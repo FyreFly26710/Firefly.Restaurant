@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { getMenuPageData } from "@/features/menu/data/get-menu-page-data";
-import { MenuPageView } from "@/features/menu/views/menu-page-view";
+import { getHomePageData } from "@/features/shop/data/get-home-page-data";
+import { HomePageView } from "@/features/shop/views/home-page-view";
 
 export const metadata: Metadata = {
-  description: "Browse the current Firefly Restaurant menu.",
+  description: "Visit Firefly Restaurant for wok-fired favourites, hours, location, and the current menu.",
 };
 
 export default async function HomePage() {
-  const menu = await getMenuPageData();
+  const page = await getHomePageData();
 
-  return <MenuPageView menu={menu} />;
+  return <HomePageView page={page} />;
 }
