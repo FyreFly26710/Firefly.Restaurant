@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/gateway.functional.tests/gateway.functional.tests.csproj" />
+    <Project Path="tests/menu.functional.tests/menu.functional.tests.csproj" />
+    <Project Path="tests/menu.unit.tests/menu.unit.tests.csproj" />
+  </Folder>
+  <Project Path="common.lib/common.lib.csproj" />
+  <Project Path="gateway.api/gateway.api.csproj" />
+  <Project Path="menu.api/menu.api.csproj" />
+  <Project Path="menu.core/menu.core.csproj" />
+</Solution>

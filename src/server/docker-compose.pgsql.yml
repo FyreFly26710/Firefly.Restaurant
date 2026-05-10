@@ -1,0 +1,31 @@
+services:
+  firefly-restaurant-postgres:
+    image: postgres:17
+    container_name: firefly-restaurant-postgres
+    environment:
+      POSTGRES_DB: firefly_restaurant
+      POSTGRES_USER: firefly
+      POSTGRES_PASSWORD: firefly_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - firefly-restaurant-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U firefly -d firefly_restaurant"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  firefly-restaurant-pgweb:
+    image: sosedoff/pgweb:latest
+    container_name: firefly-restaurant-pgweb
+    environment:
+      PGWEB_DATABASE_URL: postgres://firefly:firefly_dev_password@firefly-restaurant-postgres:5432/firefly_restaurant?sslmode=disable
+    ports:
+      - "8081:8081"
+    depends_on:
+      firefly-restaurant-postgres:
+        condition: service_healthy
+
+volumes:
+  firefly-restaurant-postgres-data:
