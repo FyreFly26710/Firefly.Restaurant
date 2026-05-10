@@ -1,0 +1,139 @@
+name: Deploy Server
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Docker image tag to deploy
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    environment: production
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_ready: ${{ steps.deploy.outputs.ready }}
+    steps:
+      - name: Check deployment secrets
+        id: deploy
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+          DEPLOY_SSH_USERNAME: ${{ secrets.DEPLOY_SSH_USERNAME }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_REMOTE_PATH: ${{ secrets.DEPLOY_REMOTE_PATH }}
+          DOCKERHUB_NAMESPACE: ${{ secrets.DOCKERHUB_NAMESPACE }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+        run: |
+          missing=""
+          for name in DEPLOY_SSH_HOST DEPLOY_SSH_PORT DEPLOY_SSH_USERNAME DEPLOY_SSH_PRIVATE_KEY DEPLOY_REMOTE_PATH DOCKERHUB_NAMESPACE POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB FIREFLY_MENU_API_BASE_URL; do
+            if [ -z "$(printenv "$name")" ]; then
+              missing="$missing $name"
+            fi
+          done
+
+          if [ -z "$missing" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Missing deployment secrets:$missing"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: preflight
+    if: needs.preflight.outputs.deploy_ready == 'true'
+    environment: production
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}
+      DEPLOY_SSH_USERNAME: ${{ secrets.DEPLOY_SSH_USERNAME }}
+      DEPLOY_REMOTE_PATH: ${{ secrets.DEPLOY_REMOTE_PATH }}
+      DOCKERHUB_NAMESPACE: ${{ secrets.DOCKERHUB_NAMESPACE }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Configure SSH
+        run: |
+          cat << EOF > ~/.ssh/config
+          Host firefly-restaurant-server
+            HostName ${DEPLOY_SSH_HOST}
+            User ${DEPLOY_SSH_USERNAME}
+            Port ${DEPLOY_SSH_PORT}
+          EOF
+
+      - name: Generate deployment env file
+        run: |
+          cat << EOF > .deploy.env
+          POSTGRES_USER=${POSTGRES_USER}
+          POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+          POSTGRES_DB=${POSTGRES_DB}
+          DOCKERHUB_NAMESPACE=${DOCKERHUB_NAMESPACE}
+          IMAGE_TAG=${IMAGE_TAG}
+          EOF
+          chmod 600 .deploy.env
+
+      - name: Upload deployment files
+        run: |
+          ssh -o StrictHostKeyChecking=no firefly-restaurant-server "mkdir -p ${DEPLOY_REMOTE_PATH}"
+          scp -P "${DEPLOY_SSH_PORT}" -o StrictHostKeyChecking=no infra/deploy/docker-compose.production.yml firefly-restaurant-server:${DEPLOY_REMOTE_PATH}/docker-compose.production.yml
+          scp -P "${DEPLOY_SSH_PORT}" -o StrictHostKeyChecking=no .deploy.env firefly-restaurant-server:${DEPLOY_REMOTE_PATH}/.env
+
+      - name: Deploy server containers
+        run: |
+          ssh -o StrictHostKeyChecking=no firefly-restaurant-server "
+            set -eux
+            export PATH=/usr/local/bin:/opt/homebrew/bin:\$PATH
+            cd ${DEPLOY_REMOTE_PATH}
+            echo Deploying Firefly Restaurant server image tag: ${IMAGE_TAG}
+            docker compose -f docker-compose.production.yml --env-file .env up -d postgres
+            docker compose -f docker-compose.production.yml --env-file .env pull gateway-api menu-api
+            docker compose -f docker-compose.production.yml --env-file .env up -d menu-api gateway-api
+            docker compose -f docker-compose.production.yml --env-file .env ps postgres menu-api gateway-api
+            for attempt in \$(seq 1 20); do
+              if curl --fail --silent --show-error http://localhost:30000/api/menu/categories > /tmp/firefly-restaurant-menu-health.json; then
+                break
+              fi
+              if [ \$attempt -eq 20 ]; then
+                exit 1
+              fi
+              sleep 3
+            done
+            for container in firefly-restaurant-gateway-api-1 firefly-restaurant-menu-api-1; do
+              docker inspect \$container --format '{{.Name}} {{.Config.Image}}'
+            done
+          "
+
+      - name: Verify public API endpoint
+        run: |
+          public_api_base_url="${FIREFLY_MENU_API_BASE_URL%/}"
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error "${public_api_base_url}/api/menu/categories" > /tmp/firefly-restaurant-public-menu-health.json; then
+              break
+            fi
+            if [ "$attempt" -eq 20 ]; then
+              exit 1
+            fi
+            sleep 3
+          done
