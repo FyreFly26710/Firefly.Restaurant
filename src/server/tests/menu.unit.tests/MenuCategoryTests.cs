@@ -21,6 +21,27 @@ public sealed class MenuCategoryTests
     }
 
     [TestMethod]
+    public void AddItem_AddsItemToCategory()
+    {
+        var category = new MenuCategory(
+            slug: "S",
+            displayName: "Starters",
+            description: "Small plates.",
+            displayOrder: 1);
+
+        var item = category.AddItem(
+            slug: "S10",
+            name: "Charred Sourdough",
+            description: "Cultured butter.",
+            price: 7.50m,
+            available: true,
+            displayOrder: 1);
+
+        Assert.AreSame(item, category.Items.Single());
+        Assert.AreSame(category, item.Category);
+    }
+
+    [TestMethod]
     public void Constructor_RejectsBlankSlug()
     {
         Assert.ThrowsExactly<ArgumentException>(() =>

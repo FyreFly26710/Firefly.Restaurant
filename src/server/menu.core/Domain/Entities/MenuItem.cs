@@ -2,51 +2,65 @@ namespace Firefly.Restaurant.Menu.Core.Domain.Entities;
 
 public sealed class MenuItem
 {
-    public MenuItem(
+    private readonly List<MenuItemTag> tags = [];
+
+    private MenuItem()
+    {
+    }
+
+    internal MenuItem(
+        MenuCategory category,
         string slug,
-        string categorySlug,
         string name,
         string description,
         decimal price,
         bool available,
         int displayOrder,
+        string? imageUrl = null,
         IEnumerable<MenuItemTag>? tags = null)
     {
-        Slug = RequireText(slug, nameof(slug));
-        CategorySlug = RequireText(categorySlug, nameof(categorySlug));
-        Name = RequireText(name, nameof(name));
+        ArgumentNullException.ThrowIfNull(category);
+
+        Category = category;
+        CategoryId = category.Id;
+        Slug = MenuCategory.RequireText(slug, nameof(slug));
+        Name = MenuCategory.RequireText(name, nameof(name));
         Description = description.Trim();
         Price = RequireNonNegative(price, nameof(price));
         Available = available;
         DisplayOrder = RequireNonNegative(displayOrder, nameof(displayOrder));
-        Tags = NormalizeTags(tags);
-    }
+        ImageUrl = MenuCategory.TrimOptionalText(imageUrl);
 
-    public string Slug { get; }
-
-    public string CategorySlug { get; }
-
-    public string Name { get; }
-
-    public string Description { get; }
-
-    public decimal Price { get; }
-
-    public bool Available { get; }
-
-    public int DisplayOrder { get; }
-
-    public IReadOnlyList<MenuItemTag> Tags { get; }
-
-    private static string RequireText(string value, string parameterName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
+        foreach (var tag in NormalizeTags(tags))
         {
-            throw new ArgumentException("Value cannot be empty.", parameterName);
+            this.tags.Add(tag);
         }
-
-        return value.Trim();
     }
+
+    public int Id { get; private set; }
+
+    public int CategoryId { get; private set; }
+
+    public MenuCategory Category { get; private set; } = null!;
+
+    /// <summary>
+    /// Editable id displayed in the menu. Can be a number such as "1" or a letter-number code such as "S10". Must be unique.
+    /// </summary>
+    public string Slug { get; private set; } = string.Empty;
+
+    public string Name { get; private set; } = string.Empty;
+
+    public string Description { get; private set; } = string.Empty;
+
+    public decimal Price { get; private set; }
+
+    public bool Available { get; private set; }
+
+    public int DisplayOrder { get; private set; }
+
+    public string? ImageUrl { get; private set; }
+
+    public IReadOnlyList<MenuItemTag> Tags => tags;
 
     private static decimal RequireNonNegative(decimal value, string parameterName)
     {
@@ -68,10 +82,11 @@ public sealed class MenuItem
         return value;
     }
 
-    private static IReadOnlyList<MenuItemTag> NormalizeTags(IEnumerable<MenuItemTag>? tags)
+    private static IEnumerable<MenuItemTag> NormalizeTags(IEnumerable<MenuItemTag>? tags)
     {
         return tags?
-            .Distinct()
+            .GroupBy(tag => tag.Value, StringComparer.Ordinal)
+            .Select(tagGroup => tagGroup.First())
             .OrderBy(tag => tag.Value, StringComparer.Ordinal)
             .ToArray() ?? [];
     }

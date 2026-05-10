@@ -8,38 +8,50 @@ public sealed class MenuItemTests
     [TestMethod]
     public void Constructor_CapturesMenuItemShape()
     {
-        var item = new MenuItem(
-            slug: " charred-sourdough ",
-            categorySlug: " starters ",
+        var category = new MenuCategory(
+            slug: "S",
+            displayName: "Starters",
+            description: "Small plates.",
+            displayOrder: 1);
+
+        var item = category.AddItem(
+            slug: " S10 ",
             name: " Charred Sourdough ",
             description: " Cultured butter. ",
             price: 7.50m,
             available: true,
             displayOrder: 2,
+            imageUrl: " https://images.example.invalid/menu/charred-sourdough.jpg ",
             tags:
             [
-                new MenuItemTag("V"),
-                new MenuItemTag(" gf "),
-                new MenuItemTag("v")
+                new MenuItemTag("V", "#2F855A"),
+                new MenuItemTag(" gf ", "#2563EB"),
+                new MenuItemTag("v", "#2F855A")
             ]);
 
-        Assert.AreEqual("charred-sourdough", item.Slug);
-        Assert.AreEqual("starters", item.CategorySlug);
+        Assert.AreEqual("S10", item.Slug);
+        Assert.AreSame(category, item.Category);
         Assert.AreEqual("Charred Sourdough", item.Name);
         Assert.AreEqual("Cultured butter.", item.Description);
         Assert.AreEqual(7.50m, item.Price);
         Assert.IsTrue(item.Available);
         Assert.AreEqual(2, item.DisplayOrder);
+        Assert.AreEqual("https://images.example.invalid/menu/charred-sourdough.jpg", item.ImageUrl);
         CollectionAssert.AreEqual(new[] { "gf", "v" }, item.Tags.Select(tag => tag.Value).ToArray());
     }
 
     [TestMethod]
     public void Constructor_RejectsNegativePrice()
     {
+        var category = new MenuCategory(
+            slug: "S",
+            displayName: "Starters",
+            description: "Small plates.",
+            displayOrder: 1);
+
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            new MenuItem(
-                slug: "charred-sourdough",
-                categorySlug: "starters",
+            category.AddItem(
+                slug: "S10",
                 name: "Charred Sourdough",
                 description: "Cultured butter.",
                 price: -1m,
@@ -48,12 +60,17 @@ public sealed class MenuItemTests
     }
 
     [TestMethod]
-    public void Constructor_RejectsBlankCategorySlug()
+    public void Constructor_RejectsBlankSlug()
     {
+        var category = new MenuCategory(
+            slug: "S",
+            displayName: "Starters",
+            description: "Small plates.",
+            displayOrder: 1);
+
         Assert.ThrowsExactly<ArgumentException>(() =>
-            new MenuItem(
-                slug: "charred-sourdough",
-                categorySlug: " ",
+            category.AddItem(
+                slug: " ",
                 name: "Charred Sourdough",
                 description: "Cultured butter.",
                 price: 7.50m,

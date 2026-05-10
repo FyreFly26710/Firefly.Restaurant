@@ -12,19 +12,19 @@ namespace Firefly.Restaurant.Gateway.FunctionalTests;
 public sealed class GatewayProxyTests
 {
     [TestMethod]
-    public async Task GetMenuItems_ProxiesRequestToConfiguredMenuApi()
+    public async Task GetMenuCategories_ProxiesRequestToConfiguredMenuApi()
     {
         await using var backend = await TestMenuBackend.StartAsync();
         await using var factory = CreateGatewayFactory(backend.Address);
         using var client = factory.CreateClient();
 
-        using var response = await client.GetAsync("/api/menu/items");
-        var payload = await response.Content.ReadFromJsonAsync<IReadOnlyList<BackendMenuItemResponse>>();
+        using var response = await client.GetAsync("/api/menu/categories");
+        var payload = await response.Content.ReadFromJsonAsync<IReadOnlyList<BackendMenuCategoryResponse>>();
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         Assert.AreEqual("menu-api", response.Headers.GetValues("X-Firefly-Test-Backend").Single());
         Assert.IsNotNull(payload);
-        Assert.AreEqual("proxied-menu-item", payload.Single().Slug);
+        Assert.AreEqual("proxied-category", payload.Single().Slug);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public sealed class GatewayProxyTests
             });
     }
 
-    private sealed record BackendMenuItemResponse(string Slug);
+    private sealed record BackendMenuCategoryResponse(string Slug);
 
     private sealed class TestMenuBackend : IAsyncDisposable
     {
@@ -78,13 +78,13 @@ public sealed class GatewayProxyTests
 
             var app = builder.Build();
 
-            app.MapGet("/api/menu/items", (HttpContext context) =>
+            app.MapGet("/api/menu/categories", (HttpContext context) =>
             {
                 context.Response.Headers.Append("X-Firefly-Test-Backend", "menu-api");
 
                 return Results.Ok(new[]
                 {
-                    new BackendMenuItemResponse("proxied-menu-item")
+                    new BackendMenuCategoryResponse("proxied-category")
                 });
             });
 

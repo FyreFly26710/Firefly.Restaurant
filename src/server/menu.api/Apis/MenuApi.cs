@@ -8,26 +8,26 @@ public static class MenuApi
 {
     public static IEndpointRouteBuilder MapMenuApi(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/menu/items")
+        var group = endpoints.MapGroup("/api/menu")
             .WithTags("Menu");
 
-        group.MapGet("", GetMenuItemsAsync)
-            .WithName("GetMenuItems");
+        group.MapGet("categories", GetMenuCategoriesAsync)
+            .WithName("GetMenuCategories");
 
-        group.MapGet("{slug}", GetMenuItemBySlugAsync)
+        group.MapGet("items/{slug}", GetMenuItemBySlugAsync)
             .WithName("GetMenuItemBySlug");
 
         return endpoints;
     }
 
-    private static async Task<Ok<IReadOnlyList<MenuItemResponse>>> GetMenuItemsAsync(
+    private static async Task<Ok<List<MenuCategoryResponse>>> GetMenuCategoriesAsync(
         IMenuQueryService menuQueryService,
         CancellationToken cancellationToken)
     {
-        var items = await menuQueryService.GetMenuItemsAsync(cancellationToken);
-        IReadOnlyList<MenuItemResponse> response = items
-            .Select(item => item.ToResponse())
-            .ToArray();
+        var categories = await menuQueryService.GetMenuCategoriesAsync(cancellationToken);
+        var response = categories
+            .Select(category => category.ToResponse())
+            .ToList();
 
         return TypedResults.Ok(response);
     }

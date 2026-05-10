@@ -1,0 +1,20 @@
+services:
+  firefly-restaurant-postgres:
+    image: postgres:17
+    container_name: firefly-restaurant-postgres
+    environment:
+      POSTGRES_DB: firefly_restaurant
+      POSTGRES_USER: firefly
+      POSTGRES_PASSWORD: firefly_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - firefly-restaurant-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U firefly -d firefly_restaurant"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  firefly-restaurant-postgres-data:

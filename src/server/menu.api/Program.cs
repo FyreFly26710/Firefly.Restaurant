@@ -5,7 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
-builder.Services.AddMenuCore();
+builder.Services.AddMenuCore(
+    builder.Configuration.GetConnectionString("MenuDb")
+        ?? throw new InvalidOperationException("Connection string 'MenuDb' is required."));
 
 var app = builder.Build();
 
