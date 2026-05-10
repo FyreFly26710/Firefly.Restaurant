@@ -22,7 +22,14 @@ If an issue needs browser-side runtime data, document the API exposure, cache be
 ## Cloudflare Deployment
 
 The project starts with Cloudflare Pages as the preferred deployment target.
-The intended future workflow is `.github/workflows/cd-web.yml`, but it should not be created until the storefront scaffold exists.
+The deployment workflow is `.github/workflows/cd-web.yml`.
+
+Production uses:
+
+- Pages project secret: `CLOUDFLARE_PAGES_PROJECT_NAME`
+- public storefront domain configured privately in Cloudflare
+- build-time API base secret: `FIREFLY_MENU_API_BASE_URL`
+- static output directory: `src/client/web/out`
 
 Known risk: current Cloudflare documentation points full-stack Next.js ISR support toward Workers with the OpenNext adapter, while Pages is the simple static site path.
 Before production launch, validate whether Cloudflare Pages satisfies Firefly's ISR and on-demand revalidation needs.

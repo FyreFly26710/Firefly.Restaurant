@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+test("guest can open the storefront root", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByRole("main")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "The menu." })).toBeVisible();
+  await expect(page.getByText("Salt and Pepper Chicken Wings")).toBeVisible();
+});
+
 test("guest can open the menu page", async ({ page }) => {
   await page.goto("/menu");
 
