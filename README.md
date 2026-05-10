@@ -16,8 +16,11 @@ Future mobile clients are expected under `src/client/ios` and `src/client/androi
 - Backend/API access from the storefront is limited to trusted build, server-side, or revalidation paths unless an issue explicitly documents an exception.
 - Blazor admin changes update backend state and trigger storefront revalidation where public content changes.
 - Media is uploaded and processed through the server/admin path, then exposed through CDN-cacheable routes.
+- Production deployment mirrors the Firefly Signal model: Cloudflare-hosted web, Dockerized server containers on the Mac server, Docker Hub image publishing, and a machine-managed Cloudflare Tunnel when gateway/API exposure is needed.
+- Blazor admin is private by default and should not receive a public hostname or default Tunnel route.
 
 Cloudflare deployment is Pages-first for now. This is an intentional project default with a known validation risk: current Cloudflare guidance points full-stack Next.js ISR support toward Workers with the OpenNext adapter, while Pages remains the straightforward static site path.
+Deployment guidance is docs-only until the web and server projects are scaffolded; do not add workflows, Dockerfiles, compose files, app code, or API schemas during guidance setup passes.
 
 ## Repository Structure
 
@@ -45,5 +48,6 @@ Issue branches use `issue-<number>-<short-kebab-title>`, and implementation work
 - `docs/product-requirements.md`: product direction and core workflows.
 - `docs/architecture.md`: system boundaries and architectural contracts.
 - `docs/development-plan.md`: phased delivery plan and known risks.
+- `docs/deployment-strategy.md`: Cloudflare, Mac server, Docker, Tunnel, CI/CD, rollback, and backup guidance.
 - `docs/client/web/README.md`: storefront setup, caching, validation, and operational notes.
 - `docs/server/README.md`: server solution setup, validation, and operational notes.

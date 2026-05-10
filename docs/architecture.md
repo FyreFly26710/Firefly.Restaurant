@@ -12,6 +12,7 @@ Firefly Restaurant has two initial project areas:
 The public storefront is static-first.
 Visitors should receive HTML, assets, and media from Cloudflare whenever possible.
 The .NET server owns admin workflows, persistence, media processing, API boundaries, and revalidation triggers.
+Production deployment follows the Firefly Signal-style operating model: Cloudflare-hosted storefront, Dockerized server containers on the Mac server, and machine-managed Cloudflare Tunnel for gateway/API exposure when needed.
 
 `docs/demo-ui` is a prototype reference for UX direction only.
 Its sample restaurant identity, names, and copy are not canonical Firefly product data.
@@ -32,6 +33,8 @@ Core frontend rules:
 
 Cloudflare deployment is Pages-first for now.
 This is an explicit project choice with a validation risk: current Cloudflare guidance directs full-stack Next.js ISR support toward Workers/OpenNext, while Pages is best suited to static output.
+The initial deployment path should use static output and Cloudflare Pages uploads.
+If true runtime ISR or on-demand path/tag revalidation is required, document the pivot to Workers/OpenNext in the issue that needs it.
 
 ## Backend
 
@@ -57,6 +60,9 @@ Backend rules:
 - Use OpenAPI for HTTP APIs.
 - Keep auth, correlation, logging, validation, and exception handling centralized.
 - Avoid splitting runtime deployment just because projects are separated in the solution.
+- Deploy executable server projects as one Docker Compose unit on the Mac server.
+- Keep `admin.app`, `menu.api`, `user.api`, databases, and queues internal to Docker networking or loopback.
+- Publish only `gateway.api` through Cloudflare Tunnel when public API exposure is explicitly needed.
 
 ## Data
 
@@ -71,7 +77,12 @@ Shared TypeScript contracts may be introduced later when they are useful for web
 
 ## Operations
 
-The local server should be reachable through Cloudflare Tunnel, not directly exposed through router ports.
+Deployment-specific guidance lives in `docs/deployment-strategy.md`.
+The local server should be reachable through a machine-managed Cloudflare Tunnel when public gateway/API access is required, not directly exposed through router ports.
+Tunnel credentials, tokens, and local configuration stay outside the tracked repository.
+
+The Blazor admin app is private by default.
+Do not add a public admin hostname, default Tunnel route, or default Cloudflare Access route unless a future issue explicitly defines the protected access model.
 
 Cloudflare should cache:
 
@@ -84,6 +95,8 @@ Timed revalidation remains the fallback path.
 
 Public `/api/*` exposure is not a default.
 If an issue adds public runtime APIs, it must document cache behavior, rate limiting, authentication needs, and abuse protections.
+Media routes should use versioned URLs and intentional cache headers so Cloudflare can cache aggressively.
+If Mac server bandwidth becomes a bottleneck, evaluate R2 or Cloudflare Images through a separate issue.
 
 ## Architecture Decisions
 
@@ -92,3 +105,6 @@ If an issue adds public runtime APIs, it must document cache behavior, rate limi
 - Keep project-specific docs under `docs/client/web` and `docs/server`.
 - Start server work as one .NET solution with multiple projects.
 - Treat Cloudflare Pages as the initial web deployment target, while tracking Workers/OpenNext as a likely ISR validation path.
+- Keep deployment setup docs-only until the web and server scaffolds exist.
+- Use Docker Hub for server image publishing unless a later issue chooses a different registry.
+- Keep Cloudflare Tunnel machine-managed, matching the familiar Firefly Signal operations model.

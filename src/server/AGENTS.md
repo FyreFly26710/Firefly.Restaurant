@@ -52,6 +52,17 @@ Keep projects separated by responsibility, but do not split runtime deployment u
 - Admin changes that affect public content should trigger storefront revalidation.
 - Timed storefront revalidation remains the fallback when on-demand revalidation is unavailable.
 
+## Deployment Expectations
+
+- Production server deployment should use Docker containers on the Mac server.
+- Publish server images to Docker Hub unless a future issue changes the registry.
+- Use one Docker Compose deployment unit for executable projects and infrastructure.
+- Keep Cloudflare Tunnel machine-managed outside the tracked repository.
+- Keep `menu.api`, `user.api`, `admin.app`, PostgreSQL, Redis, and RabbitMQ internal to Docker networking or loopback.
+- Publish only `gateway.api` to a loopback port for Cloudflare Tunnel when public API access is explicitly needed.
+- Keep Blazor admin private by default; do not add a public admin hostname, default Tunnel route, or default Cloudflare Access route without a dedicated issue.
+- Do not add `.github/workflows/cd-server-images.yml`, `.github/workflows/deploy-server.yml`, Dockerfiles, or production compose files until executable project paths and ports exist.
+
 ## Media Contract
 
 - Process admin uploads on the server path.

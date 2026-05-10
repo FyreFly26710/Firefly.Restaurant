@@ -33,6 +33,14 @@ Use this guidance with the root `AGENTS.md`, `docs/architecture.md`, `docs/devel
 - If a change adds browser-side API calls, document why static-first behavior is insufficient and describe caching, auth, rate limiting, and failure states.
 - Admin-triggered public content changes should be compatible with path or tag revalidation.
 
+## Deployment Expectations
+
+- Keep the first deployment target Cloudflare Pages with static output from `src/client/web`.
+- Do not add `.github/workflows/cd-web.yml` until the storefront scaffold exists.
+- Use Cloudflare Pages deploy hooks or workflow dispatch as the initial admin-triggered public content update path.
+- If true runtime ISR or on-demand `revalidatePath` or `revalidateTag` is needed, document the Workers/OpenNext pivot before changing deployment.
+- Do not add public browser calls to the Mac-hosted .NET gateway unless an issue explicitly documents the exception.
+
 ## Design Reference
 
 - Use `docs/demo-ui/web` as UX and visual reference.

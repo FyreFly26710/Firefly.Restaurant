@@ -50,6 +50,9 @@ Use this stack unless the project issue, docs, or a local `AGENTS.md` chooses a 
 - Keep public storefront pages static-first and CDN-cacheable by default.
 - Do not make normal public storefront browsing depend on direct .NET API calls.
 - Treat `docs/demo-ui/` as UX reference material, not production code or product identity.
+- Preserve the deployment direction documented in `docs/deployment-strategy.md`: Cloudflare Pages-first web, Dockerized server on the Mac server, Docker Hub images, and machine-managed Cloudflare Tunnel.
+- Keep Blazor admin private by default; do not add a public admin hostname or Tunnel route unless an issue explicitly requires and documents it.
+- During guidance-only setup passes, do not create CI/CD workflows, Dockerfiles, Docker Compose files, app code, or API schemas.
 
 ## Repository Structure
 
@@ -60,6 +63,7 @@ Use this stack unless the project issue, docs, or a local `AGENTS.md` chooses a 
 - `src/server/` contains the .NET server/admin/API area and its local `AGENTS.md`.
 - `src/client/ios/` and `src/client/android/` are reserved for future mobile clients.
 - `docs/` contains project-facing product, architecture, development planning, and project-specific documentation.
+- `docs/deployment-strategy.md` contains deployment, CI/CD, Tunnel, rollback, and backup guidance.
 - `docs/client/web/` contains storefront guidance.
 - `docs/server/` contains server/admin/API guidance.
 - `docs/demo-ui/` contains prototype references only; sample names and copy are not canonical product data.
