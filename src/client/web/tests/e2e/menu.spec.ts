@@ -43,3 +43,28 @@ test("guest can search the static menu without a browser API dependency", async 
   await expect(page.getByText("Lemon Chicken")).toHaveCount(0);
   expect(apiRequests).toEqual([]);
 });
+
+test("guest can open the contact page without a browser API dependency", async ({ page }) => {
+  const apiRequests: string[] = [];
+
+  page.on("request", (request) => {
+    if (request.url().includes("/api/")) {
+      apiRequests.push(request.url());
+    }
+  });
+
+  await page.goto("/contact");
+
+  await expect(page.getByRole("main")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Contact" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(page.getByRole("heading", { name: "Visit Firefly Restaurant." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "0161 555 0148" })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Contact details" }).getByText("Central Manchester"),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Where to find us" })).toBeVisible();
+  expect(apiRequests).toEqual([]);
+});

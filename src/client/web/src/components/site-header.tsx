@@ -1,12 +1,13 @@
 import Link from "next/link";
 
 type SiteHeaderProps = {
-  currentPage: "home" | "menu";
+  currentPage: "home" | "menu" | "contact";
 };
 
 const navItems = [
   { href: "/", label: "Home", page: "home" },
   { href: "/menu", label: "Menu", page: "menu" },
+  { href: "/contact", label: "Contact", page: "contact" },
 ] as const;
 
 export function SiteHeader({ currentPage }: SiteHeaderProps) {

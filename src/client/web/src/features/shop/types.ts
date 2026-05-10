@@ -59,3 +59,29 @@ export type ShopHomePageData = {
   featuredOfferings: ShopOffering[];
   contact: ShopContact;
 };
+
+export type ShopContactPageHero = {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  facts: ShopFact[];
+};
+
+export type ShopContactLocationNote = {
+  label: string;
+  body: string;
+};
+
+export type ShopContactLocation = {
+  label: string;
+  neighborhood: string;
+  mapLabel: string;
+  summary: string;
+  notes: ShopContactLocationNote[];
+};
+
+export type ShopContactPageData = {
+  hero: ShopContactPageHero;
+  contact: ShopContact;
+  location: ShopContactLocation;
+};
