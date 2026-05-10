@@ -3,6 +3,12 @@ node_modules/
 dist/
 build/
 coverage/
+.vs/
+artifacts/
+bin/
+obj/
+TestResults/
+*.user
 .env
 .env.*
 !.env.example

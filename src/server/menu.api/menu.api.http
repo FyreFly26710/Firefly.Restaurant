@@ -1,0 +1,9 @@
+@menu.api_HostAddress = http://localhost:5188
+
+GET {{menu.api_HostAddress}}/api/menu/items
+Accept: application/json
+
+###
+
+GET {{menu.api_HostAddress}}/api/menu/items/ember-roasted-carrots
+Accept: application/json
