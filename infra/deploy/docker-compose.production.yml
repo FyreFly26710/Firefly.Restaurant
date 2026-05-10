@@ -1,0 +1,45 @@
+name: firefly-restaurant
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  menu-api:
+    image: ${DOCKERHUB_NAMESPACE}/firefly-restaurant-menu-api:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__MenuDb: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  gateway-api:
+    image: ${DOCKERHUB_NAMESPACE}/firefly-restaurant-gateway-api:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:30000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ReverseProxy__Routes__menu-api-route__ClusterId: menu-api-cluster
+      ReverseProxy__Routes__menu-api-route__Match__Path: /api/menu/{**catch-all}
+      ReverseProxy__Clusters__menu-api-cluster__Destinations__menu-api__Address: http://menu-api:8080/
+    depends_on:
+      - menu-api
+
+volumes:
+  postgres-data:
