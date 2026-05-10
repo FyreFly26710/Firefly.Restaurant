@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { CategoryRail } from "../components/category-rail";
 import { EmptyMenuState } from "../components/empty-menu-state";
 import { MenuCategorySection } from "../components/menu-category-section";
 import { MenuHero } from "../components/menu-hero";
 import { MenuSearch } from "../components/menu-search";
-import { SiteFooter } from "../components/site-footer";
-import { SiteHeader } from "../components/site-header";
 import { filterMenuCategories, getMenuCategoryCounts } from "../lib/filter-menu";
 import type { MenuPageData } from "../types";
 
@@ -61,7 +61,7 @@ export function MenuPageView({ menu }: MenuPageViewProps) {
 
   return (
     <div className="site-shell">
-      <SiteHeader />
+      <SiteHeader currentPage="menu" />
 
       <main className="container menu-page">
         <MenuHero updatedLabel={menu.updatedLabel} />
