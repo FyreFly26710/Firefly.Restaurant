@@ -38,8 +38,9 @@ Production server deployment should mirror the familiar Firefly Signal model:
 - deploy manually or through SSH-based workflow dispatch,
 - keep Cloudflare Tunnel machine-managed outside the tracked repository.
 
-The intended future workflows are `.github/workflows/cd-server-images.yml` and `.github/workflows/deploy-server.yml`.
-Do not create them until the server scaffold and executable project paths exist.
+The current workflows are `.github/workflows/cd-server-images.yml` and `.github/workflows/deploy-server.yml`.
+`cd-server-images.yml` publishes executable server images to Docker Hub.
+`deploy-server.yml` is the manual SSH deploy path, but GitHub-hosted runner SSH reachability is still an operational risk until the Mac server has a durable runner or access path.
 
 Only executable projects become runtime containers:
 
