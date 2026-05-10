@@ -33,7 +33,7 @@ public sealed class MenuItem
 
         foreach (var tag in NormalizeTags(tags))
         {
-            this.tags.Add(tag);
+            AddTag(tag);
         }
     }
 
@@ -61,6 +61,12 @@ public sealed class MenuItem
     public string? ImageUrl { get; private set; }
 
     public IReadOnlyList<MenuItemTag> Tags => tags;
+
+    private void AddTag(MenuItemTag tag)
+    {
+        tag.AttachTo(this);
+        tags.Add(tag);
+    }
 
     private static decimal RequireNonNegative(decimal value, string parameterName)
     {

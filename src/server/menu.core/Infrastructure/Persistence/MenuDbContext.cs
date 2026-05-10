@@ -19,7 +19,6 @@ public sealed class MenuDbContext(DbContextOptions<MenuDbContext> options) : DbC
         ConfigureMenuCategory(modelBuilder.Entity<MenuCategory>());
         ConfigureMenuItem(modelBuilder.Entity<MenuItem>());
         ConfigureMenuItemTag(modelBuilder.Entity<MenuItemTag>());
-        SeedMenu(modelBuilder);
     }
 
     private static void ConfigureMenuCategory(EntityTypeBuilder<MenuCategory> category)
@@ -150,54 +149,4 @@ public sealed class MenuDbContext(DbContextOptions<MenuDbContext> options) : DbC
             .IsUnique();
     }
 
-    private static void SeedMenu(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<MenuCategory>().HasData(
-            new { Id = 1, Slug = "S", DisplayName = "Starters", Description = "Small plates from the kitchen.", DisplayOrder = 1 },
-            new { Id = 2, Slug = "M", DisplayName = "Mains", Description = "Larger plates from the hearth.", DisplayOrder = 2 },
-            new { Id = 3, Slug = "D", DisplayName = "Desserts", Description = "Sweet finishes.", DisplayOrder = 3 });
-
-        modelBuilder.Entity<MenuItem>().HasData(
-            new
-            {
-                Id = 1,
-                CategoryId = 1,
-                Slug = "S10",
-                Name = "Charred Sourdough",
-                Description = "Warm sourdough with cultured butter.",
-                Price = 7.50m,
-                Available = true,
-                DisplayOrder = 1,
-                ImageUrl = (string?)null
-            },
-            new
-            {
-                Id = 2,
-                CategoryId = 2,
-                Slug = "M10",
-                Name = "Oak-fired Hake",
-                Description = "Line-caught hake with lemon leaf butter, sea herbs, and crisp potatoes.",
-                Price = 24.00m,
-                Available = true,
-                DisplayOrder = 1,
-                ImageUrl = "https://images.example.invalid/menu/oak-fired-hake.jpg"
-            },
-            new
-            {
-                Id = 3,
-                CategoryId = 3,
-                Slug = "D10",
-                Name = "Molten Chocolate Tart",
-                Description = "Dark chocolate tart with malt cream and preserved cherry.",
-                Price = 9.50m,
-                Available = true,
-                DisplayOrder = 1,
-                ImageUrl = (string?)null
-            });
-
-        modelBuilder.Entity<MenuItemTag>().HasData(
-            new { Id = 1, MenuItemId = 1, Value = "vegetarian", Color = "#2F855A" },
-            new { Id = 2, MenuItemId = 2, Value = "fish", Color = "#2563EB" },
-            new { Id = 3, MenuItemId = 3, Value = "vegetarian", Color = "#2F855A" });
-    }
 }

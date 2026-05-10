@@ -3,8 +3,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Firefly.Restaurant.Menu.Core.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
@@ -74,36 +72,6 @@ namespace Firefly.Restaurant.Menu.Core.Infrastructure.Persistence.Migrations
                         principalTable: "menu_items",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "menu_categories",
-                columns: new[] { "id", "description", "display_name", "display_order", "slug" },
-                values: new object[,]
-                {
-                    { 1, "Small plates from the kitchen.", "Starters", 1, "S" },
-                    { 2, "Larger plates from the hearth.", "Mains", 2, "M" },
-                    { 3, "Sweet finishes.", "Desserts", 3, "D" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "menu_items",
-                columns: new[] { "id", "available", "category_id", "description", "display_order", "image_url", "name", "price", "slug" },
-                values: new object[,]
-                {
-                    { 1, true, 1, "Warm sourdough with cultured butter.", 1, null, "Charred Sourdough", 7.50m, "S10" },
-                    { 2, true, 2, "Line-caught hake with lemon leaf butter, sea herbs, and crisp potatoes.", 1, "https://images.example.invalid/menu/oak-fired-hake.jpg", "Oak-fired Hake", 24.00m, "M10" },
-                    { 3, true, 3, "Dark chocolate tart with malt cream and preserved cherry.", 1, null, "Molten Chocolate Tart", 9.50m, "D10" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "menu_item_tags",
-                columns: new[] { "id", "color", "menu_item_id", "value" },
-                values: new object[,]
-                {
-                    { 1, "#2F855A", 1, "vegetarian" },
-                    { 2, "#2563EB", 2, "fish" },
-                    { 3, "#2F855A", 3, "vegetarian" }
                 });
 
             migrationBuilder.CreateIndex(

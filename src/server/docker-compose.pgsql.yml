@@ -16,5 +16,16 @@ services:
       timeout: 5s
       retries: 12
 
+  firefly-restaurant-pgweb:
+    image: sosedoff/pgweb:latest
+    container_name: firefly-restaurant-pgweb
+    environment:
+      PGWEB_DATABASE_URL: postgres://firefly:firefly_dev_password@firefly-restaurant-postgres:5432/firefly_restaurant?sslmode=disable
+    ports:
+      - "8081:8081"
+    depends_on:
+      firefly-restaurant-postgres:
+        condition: service_healthy
+
 volumes:
   firefly-restaurant-postgres-data:

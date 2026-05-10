@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Firefly.Restaurant.Menu.Core.Application.Queries;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -63,6 +64,14 @@ public sealed class MenuEndpointsTests
         return new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
+                builder.UseEnvironment("Testing");
+                builder.ConfigureAppConfiguration((_, configuration) =>
+                {
+                    configuration.AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["ConnectionStrings:MenuDb"] = "Host=localhost;Port=5432;Database=firefly_restaurant_testing;Username=firefly;Password=firefly_dev_password"
+                    });
+                });
                 builder.ConfigureServices(services =>
                 {
                     services.RemoveAll<IMenuQueryService>();

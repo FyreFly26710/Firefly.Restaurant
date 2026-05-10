@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\menu.core\menu.core.csproj" />
+    <ProjectReference Include="..\common.lib\common.lib.csproj" />
   </ItemGroup>
 
 </Project>

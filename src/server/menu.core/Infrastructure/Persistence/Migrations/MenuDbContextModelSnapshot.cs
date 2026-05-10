@@ -59,32 +59,6 @@ namespace Firefly.Restaurant.Menu.Core.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("menu_categories", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Small plates from the kitchen.",
-                            DisplayName = "Starters",
-                            DisplayOrder = 1,
-                            Slug = "S"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Larger plates from the hearth.",
-                            DisplayName = "Mains",
-                            DisplayOrder = 2,
-                            Slug = "M"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Sweet finishes.",
-                            DisplayName = "Desserts",
-                            DisplayOrder = 3,
-                            Slug = "D"
-                        });
                 });
 
             modelBuilder.Entity("Firefly.Restaurant.Menu.Core.Domain.Entities.MenuItem", b =>
@@ -145,42 +119,6 @@ namespace Firefly.Restaurant.Menu.Core.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("menu_items", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Available = true,
-                            CategoryId = 1,
-                            Description = "Warm sourdough with cultured butter.",
-                            DisplayOrder = 1,
-                            Name = "Charred Sourdough",
-                            Price = 7.50m,
-                            Slug = "S10"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Available = true,
-                            CategoryId = 2,
-                            Description = "Line-caught hake with lemon leaf butter, sea herbs, and crisp potatoes.",
-                            DisplayOrder = 1,
-                            ImageUrl = "https://images.example.invalid/menu/oak-fired-hake.jpg",
-                            Name = "Oak-fired Hake",
-                            Price = 24.00m,
-                            Slug = "M10"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Available = true,
-                            CategoryId = 3,
-                            Description = "Dark chocolate tart with malt cream and preserved cherry.",
-                            DisplayOrder = 1,
-                            Name = "Molten Chocolate Tart",
-                            Price = 9.50m,
-                            Slug = "D10"
-                        });
                 });
 
             modelBuilder.Entity("Firefly.Restaurant.Menu.Core.Domain.Entities.MenuItemTag", b =>
@@ -214,29 +152,6 @@ namespace Firefly.Restaurant.Menu.Core.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("menu_item_tags", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Color = "#2F855A",
-                            MenuItemId = 1,
-                            Value = "vegetarian"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Color = "#2563EB",
-                            MenuItemId = 2,
-                            Value = "fish"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Color = "#2F855A",
-                            MenuItemId = 3,
-                            Value = "vegetarian"
-                        });
                 });
 
             modelBuilder.Entity("Firefly.Restaurant.Menu.Core.Domain.Entities.MenuItem", b =>

@@ -31,4 +31,11 @@ public sealed class MenuItemTag
     public string Value { get; private set; } = string.Empty;
 
     public string Color { get; private set; } = string.Empty;
+
+    internal void AttachTo(MenuItem menuItem)
+    {
+        ArgumentNullException.ThrowIfNull(menuItem);
+
+        MenuItem = menuItem;
+    }
 }
