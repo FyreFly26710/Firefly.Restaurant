@@ -131,6 +131,12 @@ Current workflow names and responsibilities:
 - `cd-server-images.yml`: build server Docker images and push them to Docker Hub.
 - `deploy-server.yml`: manually deploy a chosen image tag to the Mac server over SSH.
 
+Web CI must not depend on deployment secrets. The web job leaves
+`FIREFLY_MENU_API_BASE_URL` blank and validates lint, tests, static build, and
+Playwright smoke coverage against deterministic fallback storefront data. Web CD
+remains responsible for injecting the real build-time menu API base URL during
+Cloudflare Pages deployment.
+
 Use preflight checks for required secrets so missing deployment secrets skip deploy jobs cleanly or fail with a clear message before side effects.
 
 `deploy-server.yml` currently represents the desired GitHub-operated server

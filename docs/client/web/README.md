@@ -61,4 +61,9 @@ npm run build
 npm run test:e2e
 ```
 
+Web CI runs these checks without deployment secrets. `FIREFLY_MENU_API_BASE_URL`
+stays blank in `.github/workflows/ci.yml`, so static builds and Playwright smoke
+tests validate the fallback storefront data path. `.github/workflows/cd-web.yml`
+owns the real deployment-time API base URL for Cloudflare Pages builds.
+
 When Cloudflare behavior matters, also run the configured Cloudflare preview command after it exists.

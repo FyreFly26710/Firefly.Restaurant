@@ -15,6 +15,8 @@ env:
 jobs:
   web:
     runs-on: ubuntu-latest
+    env:
+      FIREFLY_MENU_API_BASE_URL: ""
     defaults:
       run:
         working-directory: src/client/web
@@ -38,32 +40,13 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Check web build secret
-        id: web_build_secret
-        env:
-          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
-        run: |
-          if [ -n "$FIREFLY_MENU_API_BASE_URL" ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::Skipping web build and Playwright checks because FIREFLY_MENU_API_BASE_URL is not available."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Build static storefront
-        if: steps.web_build_secret.outputs.ready == 'true'
-        env:
-          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
         run: npm run build
 
       - name: Install Playwright Chromium
-        if: steps.web_build_secret.outputs.ready == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright smoke tests
-        if: steps.web_build_secret.outputs.ready == 'true'
-        env:
-          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
         run: npm run test:e2e
 
   server:
