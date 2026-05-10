@@ -10,10 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\menu.core\menu.core.csproj" />
+    <ProjectReference Include="..\common.lib\common.lib.csproj" />
   </ItemGroup>
 
 </Project>

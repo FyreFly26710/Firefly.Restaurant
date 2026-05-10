@@ -1,11 +1,10 @@
-using Firefly.Restaurant.Gateway.Api.Apis;
-using Firefly.Restaurant.Menu.Core.Extensions;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
-builder.Services.AddMenuCore();
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
 
@@ -16,7 +15,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 
-app.MapGatewayMenuApi();
+app.MapReverseProxy();
 
 app.Run();
 
