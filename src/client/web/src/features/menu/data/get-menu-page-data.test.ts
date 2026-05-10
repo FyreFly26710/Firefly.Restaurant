@@ -16,7 +16,7 @@ describe("getMenuPageData", () => {
     );
   });
 
-  it("fetches menu categories from the configured API using ISR cache options", async () => {
+  it("fetches menu categories from the configured API during static generation", async () => {
     vi.stubEnv("FIREFLY_MENU_API_BASE_URL", "http://localhost:5122");
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify(testMenuCategories), {
@@ -28,16 +28,12 @@ describe("getMenuPageData", () => {
 
     await expect(getMenuPageData()).resolves.toEqual({
       categories: testMenuCategories,
-      updatedLabel: "Live menu, refreshed hourly",
+      updatedLabel: "Live menu, refreshed by deployment",
     });
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:5122/api/menu/categories", {
       headers: {
         Accept: "application/json",
-      },
-      next: {
-        revalidate: 3600,
-        tags: ["menu"],
       },
     });
   });

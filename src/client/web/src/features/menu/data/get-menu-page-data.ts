@@ -1,8 +1,5 @@
 import type { MenuCategoryResponse, MenuPageData } from "../types";
 
-const MENU_REVALIDATE_SECONDS = 3600;
-const MENU_CACHE_TAG = "menu";
-
 export async function getMenuPageData(): Promise<MenuPageData> {
   const menuApiBaseUrl = process.env.FIREFLY_MENU_API_BASE_URL?.trim();
 
@@ -12,7 +9,7 @@ export async function getMenuPageData(): Promise<MenuPageData> {
 
   return {
     categories: await fetchMenuCategories(menuApiBaseUrl),
-    updatedLabel: "Live menu, refreshed hourly",
+    updatedLabel: "Live menu, refreshed by deployment",
   };
 }
 
@@ -20,10 +17,6 @@ async function fetchMenuCategories(menuApiBaseUrl: string): Promise<MenuCategory
   const response = await fetch(buildMenuCategoriesUrl(menuApiBaseUrl), {
     headers: {
       Accept: "application/json",
-    },
-    next: {
-      revalidate: MENU_REVALIDATE_SECONDS,
-      tags: [MENU_CACHE_TAG],
     },
   });
 
