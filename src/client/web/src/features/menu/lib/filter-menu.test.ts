@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { menuFixture } from "../data/menu-fixture";
+import { testMenuCategories } from "@/test/menu-test-data";
 import { filterMenuCategories, getMenuCategoryCounts } from "./filter-menu";
 
 describe("filterMenuCategories", () => {
   it("returns every category when the search term is empty", () => {
-    expect(filterMenuCategories(menuFixture, "")).toHaveLength(menuFixture.length);
+    expect(filterMenuCategories(testMenuCategories, "")).toHaveLength(testMenuCategories.length);
   });
 
   it("filters categories to matching dishes and tags", () => {
-    const filtered = filterMenuCategories(menuFixture, "mapo");
+    const filtered = filterMenuCategories(testMenuCategories, "mapo");
 
     expect(filtered).toHaveLength(1);
     expect(filtered[0].displayName).toBe("Vegetarian and Tofu");
@@ -16,18 +16,18 @@ describe("filterMenuCategories", () => {
   });
 
   it("keeps all items when a category itself matches", () => {
-    const [rice] = filterMenuCategories(menuFixture, "rice");
+    const [rice] = filterMenuCategories(testMenuCategories, "rice");
 
     expect(rice.displayName).toBe("Rice");
-    expect(rice.items).toHaveLength(7);
+    expect(rice.items).toHaveLength(2);
   });
 });
 
 describe("getMenuCategoryCounts", () => {
   it("counts dishes by category slug", () => {
-    const counts = getMenuCategoryCounts(menuFixture);
+    const counts = getMenuCategoryCounts(testMenuCategories);
 
-    expect(counts.get("APP")).toBe(8);
-    expect(counts.get("EXT")).toBe(6);
+    expect(counts.get("APP")).toBe(2);
+    expect(counts.get("RICE")).toBe(2);
   });
 });

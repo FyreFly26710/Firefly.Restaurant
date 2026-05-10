@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { menuFixture } from "../data/menu-fixture";
+import { testMenuCategories } from "@/test/menu-test-data";
 import { MenuPageView } from "./menu-page-view";
 
 const menu = {
-  categories: menuFixture,
+  categories: testMenuCategories,
   updatedLabel: "Refreshed hourly",
 };
 
@@ -13,7 +13,7 @@ describe("MenuPageView", () => {
     render(<MenuPageView menu={menu} />);
 
     expect(screen.getByRole("heading", { name: "The menu." })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Appetisers, 8 dishes" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Appetisers, 2 dishes" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Appetisers" })).toBeVisible();
     expect(screen.getByText("Vegetarian Spring Rolls")).toBeVisible();
     expect(screen.getAllByText("vegetarian")[0]).toBeVisible();

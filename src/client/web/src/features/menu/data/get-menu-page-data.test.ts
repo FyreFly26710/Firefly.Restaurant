@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { menuFixture } from "./menu-fixture";
+import { testMenuCategories } from "@/test/menu-test-data";
 import { getMenuPageData } from "./get-menu-page-data";
 
 describe("getMenuPageData", () => {
@@ -8,19 +8,18 @@ describe("getMenuPageData", () => {
     vi.unstubAllGlobals();
   });
 
-  it("uses the typed fixture when no menu API base URL is configured", async () => {
+  it("fails loudly when no menu API base URL is configured", async () => {
     vi.stubEnv("FIREFLY_MENU_API_BASE_URL", "");
 
-    await expect(getMenuPageData()).resolves.toEqual({
-      categories: menuFixture,
-      updatedLabel: "Local fixture, refreshed hourly",
-    });
+    await expect(getMenuPageData()).rejects.toThrow(
+      "FIREFLY_MENU_API_BASE_URL is required to load menu data.",
+    );
   });
 
   it("fetches menu categories from the configured API using ISR cache options", async () => {
     vi.stubEnv("FIREFLY_MENU_API_BASE_URL", "http://localhost:5122");
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(menuFixture), {
+      new Response(JSON.stringify(testMenuCategories), {
         status: 200,
         headers: { "content-type": "application/json" },
       }),
@@ -28,7 +27,7 @@ describe("getMenuPageData", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(getMenuPageData()).resolves.toEqual({
-      categories: menuFixture,
+      categories: testMenuCategories,
       updatedLabel: "Live menu, refreshed hourly",
     });
 

@@ -1,4 +1,3 @@
-import { menuFixture } from "./menu-fixture";
 import type { MenuCategoryResponse, MenuPageData } from "../types";
 
 const MENU_REVALIDATE_SECONDS = 3600;
@@ -7,16 +6,13 @@ const MENU_CACHE_TAG = "menu";
 export async function getMenuPageData(): Promise<MenuPageData> {
   const menuApiBaseUrl = process.env.FIREFLY_MENU_API_BASE_URL?.trim();
 
-  if (menuApiBaseUrl) {
-    return {
-      categories: await fetchMenuCategories(menuApiBaseUrl),
-      updatedLabel: "Live menu, refreshed hourly",
-    };
+  if (!menuApiBaseUrl) {
+    throw new Error("FIREFLY_MENU_API_BASE_URL is required to load menu data.");
   }
 
   return {
-    categories: menuFixture,
-    updatedLabel: "Local fixture, refreshed hourly",
+    categories: await fetchMenuCategories(menuApiBaseUrl),
+    updatedLabel: "Live menu, refreshed hourly",
   };
 }
 
