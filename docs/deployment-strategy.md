@@ -1,8 +1,8 @@
 # Deployment Strategy
 
-This document records the intended deployment strategy for Firefly Restaurant.
-It is guidance only for the current setup phase.
-Do not add CI/CD workflows, Dockerfiles, Docker Compose files, app code, or API schemas until the web and server scaffolds exist.
+This document records the deployment strategy for Firefly Restaurant.
+The current implementation uses Cloudflare Pages for the static storefront and
+Docker Compose on the Mac server for the API runtime.
 
 ## Goals
 
@@ -39,9 +39,9 @@ Do not add CI/CD workflows, Dockerfiles, Docker Compose files, app code, or API 
 ### Web Storefront
 
 The storefront deploys from `src/client/web`.
-The intended future workflow is `.github/workflows/cd-web.yml`.
+The current workflow is `.github/workflows/cd-web.yml`.
 
-Expected behavior once scaffolded:
+Current behavior:
 
 - install dependencies,
 - run lint, tests, and build,
@@ -54,7 +54,7 @@ If the storefront requires true Next.js ISR or on-demand `revalidatePath` or `re
 ### Server Runtime
 
 The server deploys from `src/server`.
-The intended future workflows are `.github/workflows/cd-server-images.yml` and `.github/workflows/deploy-server.yml`.
+The current workflows are `.github/workflows/cd-server-images.yml` and `.github/workflows/deploy-server.yml`.
 
 Production should use one Docker Compose deployment unit on the Mac server.
 Only executable projects should become runtime containers:
@@ -124,8 +124,7 @@ If an issue requires true runtime ISR or on-demand path/tag revalidation, it mus
 
 ## CI/CD Shape
 
-Do not create these workflows until the matching projects exist.
-When they are created, use these names and responsibilities:
+Current workflow names and responsibilities:
 
 - `ci.yml`: run pull request and main-branch checks for the web and server projects.
 - `cd-web.yml`: build and deploy `src/client/web` to Cloudflare Pages.
@@ -134,21 +133,27 @@ When they are created, use these names and responsibilities:
 
 Use preflight checks for required secrets so missing deployment secrets skip deploy jobs cleanly or fail with a clear message before side effects.
 
+`deploy-server.yml` currently represents the desired GitHub-operated server
+deploy path, but GitHub-hosted runner SSH reachability to the Mac server has
+timed out. The durable path should be a self-hosted runner on the Mac server or
+a secured Cloudflare Access/service-token SSH path.
+
 ## Secrets
 
-Expected future web deployment secrets:
+Web deployment secrets:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_PAGES_PROJECT_NAME`
+- `FIREFLY_MENU_API_BASE_URL`
 
-Expected future image publishing secrets:
+Image publishing secrets:
 
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_TOKEN`
 - `DOCKERHUB_NAMESPACE`
 
-Expected future Mac server deployment secrets:
+Mac server deployment secrets:
 
 - `DEPLOY_SSH_HOST`
 - `DEPLOY_SSH_PORT`
@@ -156,10 +161,17 @@ Expected future Mac server deployment secrets:
 - `DEPLOY_SSH_PRIVATE_KEY`
 - `DEPLOY_REMOTE_PATH`
 
-Expected future runtime secrets should be introduced only when the owning app needs them.
-Examples include PostgreSQL credentials, authentication signing keys, revalidation tokens, and provider credentials.
+Runtime secrets:
+
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DB`
+
+Future runtime secrets should be introduced only when the owning app needs them.
+Examples include authentication signing keys, revalidation tokens, and provider credentials.
 
 Never commit Tunnel credentials, production `.env` files, SSH keys, API tokens, or database backups.
+Do not commit production hostnames, Pages project identifiers, Tunnel ids, or API hostnames in public issue/PR text or tracked docs.
 
 ## Deploy Flow
 

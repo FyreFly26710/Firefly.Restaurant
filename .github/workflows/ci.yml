@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/client/web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/client/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Check web build secret
+        id: web_build_secret
+        env:
+          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+        run: |
+          if [ -n "$FIREFLY_MENU_API_BASE_URL" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Skipping web build and Playwright checks because FIREFLY_MENU_API_BASE_URL is not available."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build static storefront
+        if: steps.web_build_secret.outputs.ready == 'true'
+        env:
+          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        if: steps.web_build_secret.outputs.ready == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright smoke tests
+        if: steps.web_build_secret.outputs.ready == 'true'
+        env:
+          FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+        run: npm run test:e2e
+
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore src/server/Firefly.Restaurant.slnx
+
+      - name: Build
+        run: dotnet build src/server/Firefly.Restaurant.slnx --no-restore
+
+      - name: Test
+        run: dotnet test src/server/Firefly.Restaurant.slnx --no-build --verbosity normal
