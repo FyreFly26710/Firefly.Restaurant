@@ -1,0 +1,62 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API: menu.api",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/server",
+      "command": "dotnet run --project menu.api/menu.api.csproj --launch-profile http",
+      "preLaunchTask": "dev: postgres up",
+      "presentation": {
+        "group": "firefly-dev",
+        "order": 1
+      }
+    },
+    {
+      "name": "API: gateway.api",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/server",
+      "command": "dotnet run --project gateway.api/gateway.api.csproj --launch-profile http",
+      "presentation": {
+        "group": "firefly-dev",
+        "order": 2
+      }
+    },
+    {
+      "name": "Web: Next.js storefront",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/client/web",
+      "command": "FIREFLY_MENU_API_BASE_URL=http://localhost:5122 npm run dev -- --hostname 127.0.0.1 --port 3000",
+      "presentation": {
+        "group": "firefly-dev",
+        "order": 3
+      }
+    },
+    {
+      "name": "Browser: open menu",
+      "type": "node-terminal",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "command": "sh -c 'until curl -fsS http://localhost:3000/menu >/dev/null; do sleep 1; done; open http://localhost:3000/menu'",
+      "presentation": {
+        "group": "firefly-dev",
+        "order": 4
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Firefly: full dev stack",
+      "configurations": [
+        "API: menu.api",
+        "API: gateway.api",
+        "Web: Next.js storefront",
+        "Browser: open menu"
+      ],
+      "stopAll": true
+    }
+  ]
+}
