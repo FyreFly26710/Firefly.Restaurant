@@ -1,28 +1,28 @@
 ---
 name: frontend-e2e-testing
-description: Default Playwright workflow for web clients under src/client/web. Use when adding, refactoring, or validating browser-level coverage for route smoke tests and critical user journeys.
+description: Firefly Restaurant Playwright workflow for the Next.js storefront under src/client/web. Use when adding, refactoring, or validating browser-level coverage for route smoke tests, static-first browsing, and critical user journeys.
 ---
 
 # Frontend E2E Testing
 
-Use this skill when browser behavior matters and component tests are not enough.
+Use this skill when storefront browser behavior matters and component tests are not enough.
 
 ## What E2E Should Cover
 
 Good Playwright targets:
 
-- route smoke tests
-- authentication redirects and protected routes
-- critical create/edit/delete flows
-- cross-page navigation
-- regressions that depend on real browser behavior
+- route smoke tests for public pages,
+- menu browsing and navigation,
+- auth redirects and protected routes when added,
+- critical create/edit/delete flows that run in the web client,
+- regressions that depend on real browser behavior.
 
-Avoid:
+For public browsing, assert user-visible content without depending on live production services.
 
-- duplicating every component test in a browser
-- broad click-through scripts with weak assertions
-- styling assertions that belong in component or visual tests
-- testing implementation details hidden behind the UI
+## Static-First Expectations
+
+Normal public route tests should not require the browser to call the .NET API.
+If a test intentionally covers a browser-side API call, make that explicit in the spec name or test comments and ensure the issue documents the exception.
 
 ## Default Layout
 
@@ -36,7 +36,7 @@ src/client/web/
 ```
 
 Only add fixtures when reuse is real.
-Do not introduce a second E2E setup at the repository root for normal web client work.
+Do not introduce a second E2E setup at the repository root for normal web storefront work.
 
 ## Commands
 
@@ -66,10 +66,10 @@ Use `data-testid` only when there is no stable accessible selector and the eleme
 ```typescript
 import { expect, test } from "@playwright/test";
 
-test("user can open a product detail page", async ({ page }) => {
-  await page.goto("/products/42");
+test("guest can open the menu page", async ({ page }) => {
+  await page.goto("/menu");
 
-  await expect(page.getByRole("heading", { name: /product/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /menu/i })).toBeVisible();
   await expect(page.getByRole("main")).toBeVisible();
 });
 ```

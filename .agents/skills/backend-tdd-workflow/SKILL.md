@@ -1,6 +1,6 @@
 ---
 name: backend-tdd-workflow
-description: Default backend TDD workflow for .NET services under src/server. Use when writing backend features, fixing backend bugs, refactoring application logic, or adding unit and functional tests.
+description: Firefly Restaurant backend TDD workflow for .NET services under src/server. Use when writing backend features, fixing backend bugs, refactoring application logic, or adding unit and functional tests.
 ---
 
 # Backend TDD Workflow
@@ -9,25 +9,35 @@ Use this skill with `backend-patterns` when backend behavior changes.
 
 ## Testing Defaults
 
-Start with a failing test at the lowest layer that owns the behavior.
+Start with a failing test at the lowest layer that owns the behavior when practical.
 
 Use:
 
-- Unit tests for domain rules, pure helpers, pure mappers, and deterministic support logic
-- Functional tests for command handlers, query services, endpoint behavior, route binding, auth, persistence, validation, and problem-details responses
+- Unit tests for domain rules, pure helpers, pure mappers, and deterministic support logic.
+- Functional tests for command handlers, query services, endpoint behavior, route binding, auth, persistence, validation, problem-details responses, and Blazor/admin service flows where appropriate.
 
 Do not add a third test layer such as `IntegrationTests` by default unless the project already uses it or the issue explicitly needs it.
 
 ## Default Test Layout
 
-Prefer this shape for new services:
+Prefer this shape once the solution is scaffolded:
 
 ```text
 src/server/
-  <Feature>.Api/
+  Firefly.Restaurant.slnx
+  gateway.api/
+  admin.app/
+  menu.api/
+  menu.core/
+  user.api/
+  user.core/
+  common.lib/
   tests/
-    <Feature>.UnitTests/
-    <Feature>.FunctionalTests/
+    menu.unit.tests/
+    menu.functional.tests/
+    user.unit.tests/
+    user.functional.tests/
+    admin.functional.tests/
 ```
 
 If an existing project uses a different naming convention, follow the existing convention.
@@ -38,7 +48,7 @@ If an existing project uses a different naming convention, follow the existing c
 2. Pick the lowest owning layer.
 3. Write the failing test first when practical.
 4. Run the narrowest test command.
-5. Implement the minimum passing code.
+5. Implement the minimum code to pass.
 6. Refactor with tests green.
 7. Run the relevant service or solution tests before handoff.
 
@@ -46,10 +56,11 @@ If an existing project uses a different naming convention, follow the existing c
 
 Use unit tests for:
 
-- domain entities and value objects
-- pure mappers
-- pure validation helpers
-- deterministic support logic with no app host
+- domain entities and value objects,
+- pure mappers,
+- pure validation helpers,
+- deterministic support logic with no app host,
+- revalidation decision logic that does not need HTTP or infrastructure.
 
 Avoid booting the web host, using EF Core, or mocking HTTP in unit tests for simple domain behavior.
 
@@ -57,14 +68,16 @@ Avoid booting the web host, using EF Core, or mocking HTTP in unit tests for sim
 
 Use functional tests for:
 
-- command handlers
-- query services
-- endpoint status codes and response bodies
-- persistence behavior
-- auth and current-user behavior
-- problem-details mapping
+- command handlers,
+- query services,
+- endpoint status codes and response bodies,
+- persistence behavior,
+- auth and current-user behavior,
+- problem-details mapping,
+- admin service behavior that affects public content,
+- revalidation adapter behavior with test doubles.
 
-Functional tests may use a test app factory, in-memory or SQLite database, and test doubles for external providers.
+Functional tests may use a test app factory, SQLite or containerized PostgreSQL when configured, and test doubles for external providers.
 Do not call real third-party services from automated tests.
 
 ## Commands
@@ -72,9 +85,10 @@ Do not call real third-party services from automated tests.
 Use project-specific commands when available. Common examples:
 
 ```bash
-dotnet test src/server/tests/<Feature>.UnitTests/<Feature>.UnitTests.csproj
-dotnet test src/server/tests/<Feature>.FunctionalTests/<Feature>.FunctionalTests.csproj
-dotnet test src/server/<Project>.sln
+dotnet test src/server/tests/menu.unit.tests/menu.unit.tests.csproj
+dotnet test src/server/tests/menu.functional.tests/menu.functional.tests.csproj
+dotnet test src/server/Firefly.Restaurant.slnx
+dotnet build src/server/Firefly.Restaurant.slnx
 ```
 
 ## Test Quality Rules
@@ -82,6 +96,7 @@ dotnet test src/server/<Project>.sln
 - Test behavior and contracts, not private implementation details.
 - Cover happy path, important edge cases, and expected error paths.
 - Include transport/auth behavior when HTTP behavior changes.
+- Include revalidation expectations when admin changes affect public content.
 - Keep fixtures close to the service that owns them unless reuse is real.
 - Do not invent numeric coverage thresholds unless the project defines them.
 
@@ -91,9 +106,9 @@ dotnet test src/server/<Project>.sln
 [TestMethod]
 public void Rename_RejectsEmptyName()
 {
-    var entity = Product.Create("Original");
+    var item = MenuItem.Create("Original");
 
-    Assert.ThrowsException<ArgumentException>(() => entity.Rename(""));
+    Assert.ThrowsException<ArgumentException>(() => item.Rename(""));
 }
 ```
 
@@ -101,12 +116,12 @@ public void Rename_RejectsEmptyName()
 
 ```csharp
 [TestMethod]
-public async Task GetProduct_ReturnsNotFoundForMissingProduct()
+public async Task GetMenuItem_ReturnsNotFoundForMissingItem()
 {
-    await using var factory = new ProductApiFactory();
+    await using var factory = new MenuApiFactory();
     using var client = factory.CreateClient();
 
-    var response = await client.GetAsync("/api/products/999");
+    var response = await client.GetAsync("/api/menu/items/999");
 
     Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
 }

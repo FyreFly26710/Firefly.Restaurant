@@ -2,7 +2,8 @@
 
 ## Repository Role
 
-This repository is designed for issue-driven agent collaboration.
+This repository is the Firefly Restaurant monorepo.
+It is designed for issue-driven agent collaboration.
 GitHub issues define the requested work, and agents perform focused implementation work.
 
 ## Agent Modes
@@ -26,13 +27,15 @@ Pair-work mode follows the `agent-pair-work-flow` skill.
 Use the same issue modes for issue-driven work: `init`, `reinit`, `plan`, `code`, `pr`, and `merge`.
 Use GitHub issues and PRs as the durable task log.
 
-## Default Tech Stack
+## Project Stack
 
-Use this stack for new projects unless the project issue, docs, or local `AGENTS.md` chooses a different stack:
+Use this stack unless the project issue, docs, or a local `AGENTS.md` chooses a more specific pattern:
 
-- Web client: React, TypeScript, Vite, TanStack Query, Zustand when client-owned global state is needed, Tailwind CSS, Vitest, Testing Library, and Playwright.
-- Backend: .NET, ASP.NET Core, EF Core when persistence is relational, MediatR for write commands, Problem Details, OpenAPI, unit tests, and functional tests.
-- Repository layout: web client under `src/client/web/`, backend under `src/server/`, shared project docs under `docs/`.
+- Web storefront: Next.js App Router, React, TypeScript, Tailwind CSS, ISR/static-first rendering, Vitest, Testing Library, and Playwright.
+- Server/admin/API: .NET 10, ASP.NET Core, Blazor Server admin pages, EF Core with PostgreSQL, MediatR for write paths, Problem Details, OpenAPI, unit tests, and functional tests.
+- Server solution: one `.slnx` under `src/server` with `user.api`, `user.core`, `menu.api`, `menu.core`, `admin.app`, `gateway.api`, and `common.lib`.
+- Repository layout: web storefront under `src/client/web/`, server under `src/server/`, future mobile under `src/client/ios/` and `src/client/android/`, shared project docs under `docs/`.
+- Agent skills: reusable skills live at the repository root under `.agents/skills/`.
 
 ## Core Principles
 
@@ -44,15 +47,22 @@ Use this stack for new projects unless the project issue, docs, or local `AGENTS
 - Do not add dependencies unless the need is clear and documented.
 - Keep assumptions visible in issue comments, PR summaries, or docs.
 - Update docs when architecture, workflow, or delivery behavior changes materially.
+- Keep public storefront pages static-first and CDN-cacheable by default.
+- Do not make normal public storefront browsing depend on direct .NET API calls.
+- Treat `docs/demo-ui/` as UX reference material, not production code or product identity.
 
 ## Repository Structure
 
 - `.agents/skills/` contains reusable agent skills for issue handling, documentation lookup, PR work, planning, frontend work, and backend work.
 - `.agents/scripts/` contains reusable agent helper scripts.
 - `.github/` contains the pull request template.
-- `src/client/web/` contains the web client area and its local `AGENTS.md`.
-- `src/server/` contains the backend/server area and its local `AGENTS.md`.
-- `docs/` contains project-facing product, architecture, and development planning documentation.
+- `src/client/web/` contains the Next.js web storefront area and its local `AGENTS.md`.
+- `src/server/` contains the .NET server/admin/API area and its local `AGENTS.md`.
+- `src/client/ios/` and `src/client/android/` are reserved for future mobile clients.
+- `docs/` contains project-facing product, architecture, development planning, and project-specific documentation.
+- `docs/client/web/` contains storefront guidance.
+- `docs/server/` contains server/admin/API guidance.
+- `docs/demo-ui/` contains prototype references only; sample names and copy are not canonical product data.
 
 ## Skill Naming Convention
 

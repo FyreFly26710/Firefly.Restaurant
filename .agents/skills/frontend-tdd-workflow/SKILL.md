@@ -1,11 +1,11 @@
 ---
 name: frontend-tdd-workflow
-description: Default frontend TDD workflow for React web clients under src/client/web. Use when writing frontend features, fixing frontend bugs, refactoring views/hooks/state, or adding Vitest and Playwright coverage.
+description: Firefly Restaurant frontend TDD workflow for the Next.js storefront under src/client/web. Use when writing storefront features, fixing UI bugs, refactoring views/hooks/state, or adding Vitest and Playwright coverage.
 ---
 
 # Frontend TDD Workflow
 
-Use this skill with `frontend-patterns` whenever frontend behavior changes.
+Use this skill with `frontend-patterns` whenever storefront behavior changes.
 
 ## Test Placement
 
@@ -21,20 +21,26 @@ Use this skill with `frontend-patterns` whenever frontend behavior changes.
 
 1. State the user-visible behavior or internal contract being changed.
 2. Choose the lowest owning layer for the first failing test.
-3. Write the smallest failing test.
+3. Write the smallest failing test when practical.
 4. Run the narrowest relevant command.
 5. Implement the minimum code to pass.
 6. Refactor with tests green.
 7. Run the broader frontend checks before handoff.
+
+## Static-First Checks
+
+For public storefront pages, include at least one validation step that confirms the route does not rely on browser-side .NET API calls unless the issue explicitly requires it.
+
+When ISR or revalidation behavior changes, test the server-data/revalidation boundary and document any Cloudflare Pages versus Workers/OpenNext assumptions in the issue or docs.
 
 ## Narrow Test Commands
 
 Prefer commands from the project package scripts. Common examples:
 
 ```bash
-npm test -- product-detail
-npm test -- useProductDetail
-npm run test:e2e -- --grep "product detail"
+npm test -- menu
+npm test -- revalidation
+npm run test:e2e -- --grep "menu"
 ```
 
 When package manager scripts differ, use the local project scripts rather than inventing new ones.
@@ -55,37 +61,12 @@ If browser-visible behavior changed, also run:
 npm run test:e2e
 ```
 
+If Cloudflare runtime behavior matters and a preview script exists, run it and record the result.
+
 ## Testing Rules
 
 - Test behavior, not implementation details.
 - Prefer accessible queries such as role, label, and visible text.
-- Mock API modules at the transport boundary for component and hook tests.
-- Use the shared `renderWithProviders` and `renderHookWithProviders` helpers when they exist.
-- Give TanStack Query tests a test `QueryClient` with retries disabled.
+- Mock backend modules at the server-data or transport boundary.
+- Use shared test render helpers when they exist.
 - Keep Playwright focused on critical flows instead of duplicating component tests.
-
-## Example Hook Test Shape
-
-```typescript
-it("loads the product detail", async () => {
-  vi.mocked(getProductById).mockResolvedValueOnce({ id: 42, name: "Example" });
-
-  const { result } = renderHookWithProviders(() => useProductDetail(42));
-
-  await waitFor(() => expect(result.current.isSuccess).toBe(true));
-  expect(result.current.data?.name).toBe("Example");
-});
-```
-
-## Example View Test Shape
-
-```typescript
-it("renders the loaded product", async () => {
-  vi.mocked(getProductById).mockResolvedValueOnce({ id: 42, name: "Example" });
-
-  renderWithProviders(<ProductDetailView productId="42" />);
-
-  expect(screen.getByText(/loading/i)).toBeInTheDocument();
-  expect(await screen.findByRole("heading", { name: "Example" })).toBeVisible();
-});
-```
