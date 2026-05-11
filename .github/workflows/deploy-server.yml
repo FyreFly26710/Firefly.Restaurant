@@ -107,6 +107,9 @@ jobs:
             export PATH=/usr/local/bin:/opt/homebrew/bin:\$PATH
             deploy_docker_config=\$(mktemp -d)
             trap 'rm -rf "\$deploy_docker_config"' EXIT
+            if [ -d \$HOME/.docker/cli-plugins ]; then
+              ln -s \$HOME/.docker/cli-plugins \$deploy_docker_config/cli-plugins
+            fi
             export DOCKER_CONFIG=\$deploy_docker_config
             cd ${DEPLOY_REMOTE_PATH}
             echo Deploying Firefly Restaurant server image tag: ${IMAGE_TAG}
