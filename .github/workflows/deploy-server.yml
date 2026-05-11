@@ -110,6 +110,7 @@ jobs:
             if [ -d \$HOME/.docker/cli-plugins ]; then
               ln -s \$HOME/.docker/cli-plugins \$deploy_docker_config/cli-plugins
             fi
+            printf '%s\n' '{"auths":{"https://index.docker.io/v1/":{}}}' > \$deploy_docker_config/config.json
             export DOCKER_CONFIG=\$deploy_docker_config
             cd ${DEPLOY_REMOTE_PATH}
             echo Deploying Firefly Restaurant server image tag: ${IMAGE_TAG}
