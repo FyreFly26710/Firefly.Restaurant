@@ -1,5 +1,7 @@
-import type { ShopHomePageData } from "../types";
+import type { ShopHomePageData, ShopProfileResponse } from "../types";
 import { mockShopContact } from "./mock-shop-contact";
+import { fetchShopProfileWithFallback } from "./shop-profile-api";
+import { getOpenDaysSummary, mapShopProfileContact } from "./shop-profile-mappers";
 
 const mockHomePageData = {
   hero: {
@@ -67,5 +69,38 @@ const mockHomePageData = {
 } satisfies ShopHomePageData;
 
 export async function getHomePageData(): Promise<ShopHomePageData> {
-  return mockHomePageData;
+  const shopProfile = await fetchShopProfileWithFallback();
+
+  return shopProfile ? mapShopProfileToHomePageData(shopProfile) : mockHomePageData;
+}
+
+function mapShopProfileToHomePageData(profile: ShopProfileResponse): ShopHomePageData {
+  const contact = mapShopProfileContact(profile);
+
+  return {
+    hero: {
+      eyebrow: mockHomePageData.hero.eyebrow,
+      headline: profile.displayName,
+      tagline: profile.homeHeadline,
+      lead: profile.homeDescription,
+      primaryAction: mockHomePageData.hero.primaryAction,
+      secondaryAction: mockHomePageData.hero.secondaryAction,
+      facts: [
+        { label: "Kitchen", value: getOpenDaysSummary(contact.hours) },
+        { label: "Collection", value: "Call ahead" },
+        { label: "Location", value: profile.contactDetails.city },
+        { label: "Service", value: "Takeaway" },
+      ],
+    },
+    story: {
+      eyebrow: mockHomePageData.story.eyebrow,
+      title: profile.homeHeadline,
+      paragraphs: [profile.homeDescription, profile.contactIntro],
+      signature: mockHomePageData.story.signature,
+      signatureLabel: profile.displayName,
+    },
+    pillars: mockHomePageData.pillars,
+    featuredOfferings: mockHomePageData.featuredOfferings,
+    contact,
+  };
 }
