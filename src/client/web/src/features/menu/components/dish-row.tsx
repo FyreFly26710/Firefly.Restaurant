@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import styles from "./dish-row.module.css";
 import type { ItemTagResponse, MenuItemResponse } from "../types";
 
 type DishRowProps = {
@@ -12,24 +13,24 @@ const priceFormatter = new Intl.NumberFormat("en-GB", {
 
 export function DishRow({ item }: DishRowProps) {
   return (
-    <article className="dish-row">
-      <div className="dish-main">
-        <div className="dish-title-line">
-          <h3 className="dish-name">{item.name}</h3>
+    <article className={styles["dish-row"]}>
+      <div className={styles["dish-main"]}>
+        <div className={styles["dish-title-line"]}>
+          <h3 className={styles["dish-name"]}>{item.name}</h3>
           {item.tags.map((tag) => (
             <DishTag key={`${item.slug}-${tag.value}`} tag={tag} />
           ))}
         </div>
-        <p className="dish-description">{item.description}</p>
+        <p className={styles["dish-description"]}>{item.description}</p>
       </div>
-      <p className="dish-price">{priceFormatter.format(item.price)}</p>
+      <p className={styles["dish-price"]}>{priceFormatter.format(item.price)}</p>
     </article>
   );
 }
 
 function DishTag({ tag }: { tag: ItemTagResponse }) {
   return (
-    <span className="dish-tag" style={{ "--tag-color": tag.color } as CSSProperties}>
+    <span className={styles["dish-tag"]} style={{ "--tag-color": tag.color } as CSSProperties}>
       {tag.value}
     </span>
   );

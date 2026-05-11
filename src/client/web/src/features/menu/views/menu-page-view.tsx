@@ -9,6 +9,7 @@ import { MenuCategorySection } from "../components/menu-category-section";
 import { MenuHero } from "../components/menu-hero";
 import { MenuSearch } from "../components/menu-search";
 import { filterMenuCategories, getMenuCategoryCounts } from "../lib/filter-menu";
+import styles from "./menu-page-view.module.css";
 import type { MenuPageData } from "../types";
 
 type MenuPageViewProps = {
@@ -60,13 +61,13 @@ export function MenuPageView({ menu }: MenuPageViewProps) {
   };
 
   return (
-    <div className="site-shell">
+    <div className={styles["site-shell"]}>
       <SiteHeader currentPage="menu" />
 
-      <main className="container menu-page">
+      <main className={`${styles.container} ${styles["menu-page"]}`}>
         <MenuHero updatedLabel={menu.updatedLabel} />
 
-        <section className="menu-layout" aria-label="Browse menu">
+        <section className={styles["menu-layout"]} aria-label="Browse menu">
           <CategoryRail
             categories={menu.categories}
             categoryCounts={categoryCounts}

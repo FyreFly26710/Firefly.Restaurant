@@ -1,0 +1,152 @@
+.container {
+  width: min(100%, var(--maxw));
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+.display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.button-link {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.button-link:hover,
+.button-link:focus-visible {
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.button-link-primary {
+  background: var(--color-ember);
+  color: white;
+}
+
+.button-link-primary:hover,
+.button-link-primary:focus-visible {
+  background: var(--color-ember-deep);
+}
+
+.button-link-secondary {
+  border: 1px solid var(--rule-strong);
+  color: var(--color-ink);
+}
+
+.button-link-secondary:hover,
+.button-link-secondary:focus-visible {
+  background: var(--color-cream-2);
+}
+
+.contact-hero {
+  padding-block: 64px 78px;
+}
+
+.contact-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(280px, 420px);
+  gap: clamp(34px, 6vw, 82px);
+  align-items: end;
+}
+
+.contact-eyebrow {
+  color: var(--color-ink-3);
+}
+
+.contact-hero h1 {
+  max-width: 8ch;
+  margin: 18px 0 0;
+  font-size: clamp(4.2rem, 11vw, 8.4rem);
+  line-height: 0.9;
+}
+
+.contact-lede {
+  max-width: 56ch;
+  margin: 24px 0 0;
+  color: var(--color-ink-3);
+  font-size: clamp(1rem, 0.96rem + 0.22vw, 1.13rem);
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.contact-fact-panel {
+  margin: 0;
+  border-left: 1px solid var(--rule-strong);
+  padding-left: 24px;
+}
+
+.contact-fact-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: 18px;
+  border-bottom: 1px solid var(--rule);
+  padding-block: 16px;
+}
+
+.contact-fact-row dt {
+  color: var(--color-ink-3);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.contact-fact-row dd {
+  margin: 0;
+  color: var(--color-ink);
+  font-weight: 600;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .contact-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-fact-panel {
+    border-left: 0;
+    border-top: 1px solid var(--rule-strong);
+    padding: 18px 0 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .contact-hero {
+    padding-block: 42px 54px;
+  }
+
+  .contact-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .contact-actions .button-link {
+    width: 100%;
+  }
+}

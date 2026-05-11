@@ -1,3 +1,5 @@
+import styles from "./menu-search.module.css";
+
 type MenuSearchProps = {
   value: string;
   onChange: (value: string) => void;
@@ -5,12 +7,12 @@ type MenuSearchProps = {
 
 export function MenuSearch({ value, onChange }: MenuSearchProps) {
   return (
-    <div className="menu-search-row">
+    <div className={styles["menu-search-row"]}>
       <label className="sr-only" htmlFor="menu-search">
         Search menu
       </label>
-      <div className="search-field">
-        <span className="search-field-mark" aria-hidden="true">
+      <div className={styles["search-field"]}>
+        <span className={styles["search-field-mark"]} aria-hidden="true">
           *
         </span>
         <input

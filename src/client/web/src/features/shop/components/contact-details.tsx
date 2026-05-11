@@ -1,3 +1,4 @@
+import styles from "./contact-details.module.css";
 import type { ShopContact } from "../types";
 
 type ContactDetailsProps = {
@@ -6,16 +7,16 @@ type ContactDetailsProps = {
 
 export function ContactDetails({ contact }: ContactDetailsProps) {
   return (
-    <section className="container contact-details" aria-labelledby="contact-details-title">
+    <section className={`${styles.container} ${styles["contact-details"]}`} aria-labelledby="contact-details-title">
       <div>
-        <p className="mono-label">Details</p>
-        <h2 id="contact-details-title" className="display">
+        <p className={styles["mono-label"]}>Details</p>
+        <h2 id="contact-details-title" className={styles.display}>
           Contact details
         </h2>
       </div>
 
-      <div className="contact-details-grid">
-        <div className="contact-info-panel">
+      <div className={styles["contact-details-grid"]}>
+        <div className={styles["contact-info-panel"]}>
           <h3>Address</h3>
           <address>
             {contact.addressLines.map((line) => (
@@ -24,7 +25,7 @@ export function ContactDetails({ contact }: ContactDetailsProps) {
           </address>
         </div>
 
-        <div className="contact-info-panel">
+        <div className={styles["contact-info-panel"]}>
           <h3>Reach us</h3>
           <p>
             <a href={contact.phoneHref}>{contact.phoneLabel}</a>
@@ -32,9 +33,9 @@ export function ContactDetails({ contact }: ContactDetailsProps) {
           </p>
         </div>
 
-        <div className="contact-hours-panel">
+        <div className={styles["contact-hours-panel"]}>
           <h3>Opening hours</h3>
-          <table className="contact-hours-table">
+          <table className={styles["contact-hours-table"]}>
             <tbody>
               {contact.hours.map((row) => (
                 <tr key={row.day}>

@@ -1,0 +1,40 @@
+.home-highlight-strip {
+  border-block: 1px solid var(--rule);
+  background: rgb(246 244 239 / 0.68);
+  padding-block: 20px;
+}
+
+.home-highlight-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  justify-content: center;
+  gap: 36px;
+  padding-inline: var(--gut);
+  color: var(--color-ink-2);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.65rem;
+}
+
+.home-highlight-track span {
+  display: inline-flex;
+  align-items: center;
+  gap: 36px;
+  white-space: nowrap;
+}
+
+.home-highlight-track span::after {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-ember);
+  content: "";
+}
+
+@media (max-width: 640px) {
+  .home-highlight-track {
+    justify-content: flex-start;
+    overflow-x: auto;
+    font-size: 1.35rem;
+  }
+}

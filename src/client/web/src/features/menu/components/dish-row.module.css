@@ -1,0 +1,62 @@
+.dish-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  border-bottom: 1px solid var(--rule);
+  padding: 20px 0;
+}
+
+.dish-row:hover {
+  background: rgb(217 119 87 / 0.04);
+}
+
+.dish-main {
+  min-width: 0;
+}
+
+.dish-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+
+.dish-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.35rem, 1.15rem + 0.6vw, 1.7rem);
+  line-height: 1.08;
+}
+
+.dish-description {
+  max-width: 72ch;
+  margin: 8px 0 0;
+  color: var(--color-ink-3);
+  font-size: 0.94rem;
+}
+
+.dish-price {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.dish-tag {
+  --tag-color: var(--color-olive);
+  display: inline-flex;
+  border: 1px solid color-mix(in srgb, var(--tag-color), transparent 62%);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tag-color), white 88%);
+  color: color-mix(in srgb, var(--tag-color), black 24%);
+  padding: 3px 7px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.64rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .dish-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

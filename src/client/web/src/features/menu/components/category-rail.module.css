@@ -1,0 +1,74 @@
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.category-rail {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-rail-title {
+  margin-bottom: 10px;
+  padding-inline: 12px;
+  color: var(--color-ink-3);
+}
+
+.category-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.category-button:hover,
+.category-button:focus-visible {
+  background: var(--color-cream-2);
+  outline: none;
+}
+
+.category-button.active {
+  background: var(--color-ink);
+  color: var(--color-cream);
+}
+
+.category-button-count {
+  color: currentColor;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  opacity: 0.62;
+}
+
+@media (max-width: 900px) {
+  .category-rail {
+    position: relative;
+    top: auto;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 12px;
+  }
+
+  .category-rail-title {
+    display: none;
+  }
+
+  .category-button {
+    min-width: max-content;
+  }
+}
