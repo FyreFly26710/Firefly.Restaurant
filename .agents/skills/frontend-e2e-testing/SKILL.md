@@ -23,6 +23,7 @@ For public browsing, assert user-visible content without depending on live produ
 
 Normal public route tests should not require the browser to call the .NET API.
 If a test intentionally covers a browser-side API call, make that explicit in the spec name or test comments and ensure the issue documents the exception.
+Run normal public E2E against deterministic fallback or fixture data. Do not let Playwright inherit a developer, preview, or production API base URL for smoke tests that are meant to validate static browsing.
 
 ## Default Layout
 
@@ -80,4 +81,7 @@ test("guest can open the menu page", async ({ page }) => {
 - Keep each spec focused on one journey.
 - Prefer seeded or mocked test data when the project has fixtures.
 - Do not depend on production services.
+- Use a controlled web server config for deterministic E2E runs: explicit port, explicit storefront data environment, and no reuse of an already-running app server when that server may have different API settings.
+- For public routes, capture page requests and assert that the browser did not request `/api/` unless the issue explicitly covers a browser API flow.
+- Assert stable user-visible behavior from deterministic fixtures or fallback data, not content that can change in a live API.
 - Capture traces/screenshots only through Playwright config or failure diagnostics unless debugging locally.

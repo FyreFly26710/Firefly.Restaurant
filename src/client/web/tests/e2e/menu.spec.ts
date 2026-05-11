@@ -1,40 +1,33 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
-test("guest can open the storefront root", async ({ page }) => {
-  const apiRequests: string[] = [];
-
-  page.on("request", (request) => {
-    if (request.url().includes("/api/")) {
-      apiRequests.push(request.url());
-    }
-  });
+test("guest can open the storefront root with fallback content", async ({ page }) => {
+  const apiRequests = collectBrowserApiRequests(page);
 
   await page.goto("/");
 
   await expect(page.getByRole("main")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Firefly Restaurant" })).toBeVisible();
   await expect(page.getByRole("link", { name: "View the menu" })).toBeVisible();
-  await expect(page.getByText("Salt and Pepper Chicken Wings")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "House favourites." })).toBeVisible();
   expect(apiRequests).toEqual([]);
 });
 
-test("guest can open the menu page", async ({ page }) => {
+test("guest can open the menu page with deterministic fallback data", async ({ page }) => {
+  const apiRequests = collectBrowserApiRequests(page);
+
   await page.goto("/menu");
 
   await expect(page.getByRole("main")).toBeVisible();
   await expect(page.getByRole("heading", { name: "The menu." })).toBeVisible();
+  await expect(
+    page.getByLabel("Menu details").getByText("Mock menu, API unavailable"),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Appetisers, 8 dishes" })).toBeVisible();
-  await expect(page.getByText("Salt and Pepper Chicken Wings")).toBeVisible();
+  expect(apiRequests).toEqual([]);
 });
 
 test("guest can search the static menu without a browser API dependency", async ({ page }) => {
-  const apiRequests: string[] = [];
-
-  page.on("request", (request) => {
-    if (request.url().includes("/api/")) {
-      apiRequests.push(request.url());
-    }
-  });
+  const apiRequests = collectBrowserApiRequests(page);
 
   await page.goto("/menu");
   await page.getByLabel("Search menu").fill("mapo");
@@ -45,13 +38,7 @@ test("guest can search the static menu without a browser API dependency", async 
 });
 
 test("guest can open the contact page without a browser API dependency", async ({ page }) => {
-  const apiRequests: string[] = [];
-
-  page.on("request", (request) => {
-    if (request.url().includes("/api/")) {
-      apiRequests.push(request.url());
-    }
-  });
+  const apiRequests = collectBrowserApiRequests(page);
 
   await page.goto("/contact");
 
@@ -61,10 +48,22 @@ test("guest can open the contact page without a browser API dependency", async (
     "page",
   );
   await expect(page.getByRole("heading", { name: "Visit Firefly Restaurant." })).toBeVisible();
-  await expect(page.getByRole("link", { name: "0161 555 0148" })).toBeVisible();
-  await expect(
-    page.getByRole("region", { name: "Contact details" }).getByText("Central Manchester"),
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Call the restaurant" })).toHaveAttribute(
+    "href",
+    "tel:01615550148",
+  );
   await expect(page.getByRole("heading", { name: "Where to find us" })).toBeVisible();
   expect(apiRequests).toEqual([]);
 });
+
+function collectBrowserApiRequests(page: Page) {
+  const apiRequests: string[] = [];
+
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/api/")) {
+      apiRequests.push(request.url());
+    }
+  });
+
+  return apiRequests;
+}
