@@ -105,9 +105,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no firefly-restaurant-server "
             set -eux
             export PATH=/usr/local/bin:/opt/homebrew/bin:\$PATH
-            deploy_docker_config="\$(mktemp -d)"
+            deploy_docker_config=\$(mktemp -d)
             trap 'rm -rf "\$deploy_docker_config"' EXIT
-            export DOCKER_CONFIG="\$deploy_docker_config"
+            export DOCKER_CONFIG=\$deploy_docker_config
             cd ${DEPLOY_REMOTE_PATH}
             echo Deploying Firefly Restaurant server image tag: ${IMAGE_TAG}
             docker compose -f docker-compose.production.yml --env-file .env up -d postgres
