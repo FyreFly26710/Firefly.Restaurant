@@ -1,3 +1,4 @@
+import styles from "./category-rail.module.css";
 import type { MenuCategoryResponse } from "../types";
 
 type CategoryRailProps = {
@@ -14,15 +15,19 @@ export function CategoryRail({
   onCategorySelect,
 }: CategoryRailProps) {
   return (
-    <aside className="category-rail" aria-label="Menu categories">
-      <p className="category-rail-title mono-label">Categories</p>
+    <aside className={styles["category-rail"]} aria-label="Menu categories">
+      <p className={`${styles["category-rail-title"]} ${styles["mono-label"]}`}>Categories</p>
       {categories.map((category) => {
         const count = categoryCounts.get(category.slug) ?? 0;
         const isActive = activeCategory === category.slug;
 
         return (
           <button
-            className={`category-button ${isActive ? "active" : ""}`}
+            className={
+              isActive
+                ? `${styles["category-button"]} ${styles.active}`
+                : styles["category-button"]
+            }
             key={category.slug}
             type="button"
             onClick={() => onCategorySelect(category.slug)}
@@ -30,7 +35,7 @@ export function CategoryRail({
             aria-current={isActive ? "true" : undefined}
           >
             <span>{category.displayName}</span>
-            <span className="category-button-count">{count}</span>
+            <span className={styles["category-button-count"]}>{count}</span>
           </button>
         );
       })}

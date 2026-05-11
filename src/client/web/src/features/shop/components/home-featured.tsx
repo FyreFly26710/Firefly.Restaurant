@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import styles from "./home-featured.module.css";
 import type { ShopOffering } from "../types";
 
 type HomeFeaturedProps = {
@@ -13,21 +14,21 @@ const priceFormatter = new Intl.NumberFormat("en-GB", {
 
 export function HomeFeatured({ offerings }: HomeFeaturedProps) {
   return (
-    <section className="container home-featured" aria-labelledby="home-featured-title">
-      <div className="home-section-head">
+    <section className={`${styles.container} ${styles["home-featured"]}`} aria-labelledby="home-featured-title">
+      <div className={styles["home-section-head"]}>
         <div>
-          <p className="mono-label text-ember-deep">On the menu</p>
-          <h2 id="home-featured-title" className="display">
+          <p className={`${styles["mono-label"]} text-ember-deep`}>On the menu</p>
+          <h2 id="home-featured-title" className={styles.display}>
             House favourites.
           </h2>
         </div>
-        <Link className="button-link button-link-secondary" href="/menu">
+        <Link className={`${styles["button-link"]} ${styles["button-link-secondary"]}`} href="/menu">
           Full menu
           <span aria-hidden="true">&rarr;</span>
         </Link>
       </div>
 
-      <div className="home-offering-grid">
+      <div className={styles["home-offering-grid"]}>
         {offerings.map((offering) => (
           <OfferingCard key={offering.name} offering={offering} />
         ))}
@@ -38,15 +39,15 @@ export function HomeFeatured({ offerings }: HomeFeaturedProps) {
 
 function OfferingCard({ offering }: { offering: ShopOffering }) {
   return (
-    <article className="home-offering">
+    <article className={styles["home-offering"]}>
       <div
-        className="home-offering-media"
+        className={styles["home-offering-media"]}
         style={{ "--offering-accent": offering.accentColor } as CSSProperties}
         aria-hidden="true"
       >
         <span />
       </div>
-      <div className="home-offering-body">
+      <div className={styles["home-offering-body"]}>
         <h3>{offering.name}</h3>
         <p>{offering.description}</p>
         <span>{priceFormatter.format(offering.price)}</span>

@@ -6,6 +6,7 @@ import { HomeHero } from "../components/home-hero";
 import { HomeHighlightStrip } from "../components/home-highlight-strip";
 import { HomePillars } from "../components/home-pillars";
 import { HomeStory } from "../components/home-story";
+import styles from "./home-page-view.module.css";
 import type { ShopHomePageData } from "../types";
 
 type HomePageViewProps = {
@@ -14,10 +15,10 @@ type HomePageViewProps = {
 
 export function HomePageView({ page }: HomePageViewProps) {
   return (
-    <div className="site-shell">
+    <div className={styles["site-shell"]}>
       <SiteHeader currentPage="home" />
 
-      <main className="home-page">
+      <main className={styles["home-page"]}>
         <HomeHero hero={page.hero} />
         <HomeHighlightStrip />
         <HomeStory story={page.story} />

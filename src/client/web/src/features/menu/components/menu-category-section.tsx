@@ -1,4 +1,5 @@
 import { DishRow } from "./dish-row";
+import styles from "./menu-category-section.module.css";
 import type { MenuCategoryResponse } from "../types";
 
 type MenuCategorySectionProps = {
@@ -9,12 +10,12 @@ type MenuCategorySectionProps = {
 export function MenuCategorySection({ category, sectionId }: MenuCategorySectionProps) {
   return (
     <section
-      className="category-section"
+      className={styles["category-section"]}
       id={sectionId}
       aria-labelledby={`${sectionId}-title`}
     >
-      <div className="category-heading">
-        <h2 className="display" id={`${sectionId}-title`}>
+      <div className={styles["category-heading"]}>
+        <h2 className={styles.display} id={`${sectionId}-title`}>
           {category.displayName}
         </h2>
         <p>{category.description}</p>

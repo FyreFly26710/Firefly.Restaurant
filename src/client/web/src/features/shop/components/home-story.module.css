@@ -1,0 +1,87 @@
+.container {
+  width: min(100%, var(--maxw));
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+.display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.home-story {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(36px, 6rem, 86px);
+  padding-block: 96px;
+}
+
+.home-story h2 {
+  max-width: 11ch;
+  margin: 18px 0 0;
+  font-size: 4.8rem;
+  line-height: 0.96;
+}
+
+.home-story-copy p {
+  max-width: 66ch;
+  margin: 0 0 20px;
+  color: var(--color-ink-2);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.home-story-copy p:first-child::first-letter {
+  float: left;
+  padding: 7px 10px 0 0;
+  color: var(--color-ember);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 3.6rem;
+  line-height: 0.82;
+}
+
+.home-signature {
+  color: var(--color-ink);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.55rem;
+  font-style: italic;
+}
+
+.home-signature span {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-ink-3);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .home-story {
+    grid-template-columns: 1fr;
+  }
+
+  .home-story h2 {
+    font-size: 3.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-story {
+    padding-block: 68px;
+  }
+
+  .home-story h2 {
+    font-size: 2.75rem;
+  }
+}

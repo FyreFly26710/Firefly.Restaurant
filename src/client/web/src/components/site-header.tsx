@@ -1,4 +1,5 @@
 import Link from "next/link";
+import styles from "./site-header.module.css";
 
 type SiteHeaderProps = {
   currentPage: "home" | "menu" | "contact";
@@ -12,18 +13,18 @@ const navItems = [
 
 export function SiteHeader({ currentPage }: SiteHeaderProps) {
   return (
-    <header className="site-header">
-      <div className="container site-header-row">
-        <Link className="brand" href="/" aria-label="Firefly Restaurant home">
-          <span className="brand-mark" aria-hidden="true">
+    <header className={styles["site-header"]}>
+      <div className={`${styles.container} ${styles["site-header-row"]}`}>
+        <Link className={styles.brand} href="/" aria-label="Firefly Restaurant home">
+          <span className={styles["brand-mark"]} aria-hidden="true">
             F
           </span>
           <span>Firefly Restaurant</span>
         </Link>
-        <nav className="site-nav" aria-label="Primary navigation">
+        <nav className={styles["site-nav"]} aria-label="Primary navigation">
           {navItems.map((item) => (
             <Link
-              className="nav-link"
+              className={styles["nav-link"]}
               href={item.href}
               key={item.page}
               aria-current={currentPage === item.page ? "page" : undefined}

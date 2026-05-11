@@ -1,0 +1,32 @@
+.container {
+  width: min(100%, var(--maxw));
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+.site-shell {
+  min-height: 100vh;
+}
+
+.menu-page {
+  padding-block: clamp(40px, 6vw, 78px) 96px;
+}
+
+.menu-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 52px);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .menu-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .menu-page {
+    padding-top: 34px;
+  }
+}

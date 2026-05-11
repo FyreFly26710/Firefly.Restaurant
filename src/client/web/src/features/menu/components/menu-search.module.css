@@ -1,0 +1,35 @@
+.menu-search-row {
+  margin-bottom: 34px;
+}
+
+.search-field {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 12px;
+  background: white;
+  padding-inline: 16px;
+}
+
+.search-field:focus-within {
+  border-color: var(--color-ember);
+  box-shadow: 0 0 0 3px rgb(217 119 87 / 0.18);
+}
+
+.search-field-mark {
+  color: var(--color-ember-deep);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.search-field input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  outline: 0;
+}
