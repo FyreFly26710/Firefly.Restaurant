@@ -99,6 +99,8 @@ Prefer Next.js cache primitives for public content:
 - Use Playwright for route smoke tests, navigation, and critical browser journeys.
 - Prefer accessible queries and visible outcomes.
 - Mock backend access at the server-data or transport boundary.
+- Keep UI and browser tests deterministic: use local fixtures, mocked transport responses, or fallback storefront data instead of live or mutable API payloads.
+- Component/view tests should render explicit props or fixtures rather than invoking data loaders that may read deployment-specific environment variables.
 
 ## What Not To Do
 

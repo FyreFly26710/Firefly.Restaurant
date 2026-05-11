@@ -30,6 +30,7 @@ Use this skill with `frontend-patterns` whenever storefront behavior changes.
 ## Static-First Checks
 
 For public storefront pages, include at least one validation step that confirms the route does not rely on browser-side .NET API calls unless the issue explicitly requires it.
+UI and view tests should receive explicit view-model fixtures or stub the server-data boundary. Do not call data-loading helpers from component tests when ambient environment variables could make the test read API-backed data.
 
 When ISR or revalidation behavior changes, test the server-data/revalidation boundary and document any Cloudflare Pages versus Workers/OpenNext assumptions in the issue or docs.
 
@@ -68,5 +69,6 @@ If Cloudflare runtime behavior matters and a preview script exists, run it and r
 - Test behavior, not implementation details.
 - Prefer accessible queries such as role, label, and visible text.
 - Mock backend modules at the server-data or transport boundary.
+- Keep fixtures deterministic and version-controlled; do not assert against live, preview, or production API payloads.
 - Use shared test render helpers when they exist.
 - Keep Playwright focused on critical flows instead of duplicating component tests.
