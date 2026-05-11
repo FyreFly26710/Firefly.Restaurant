@@ -85,3 +85,36 @@ export type ShopContactPageData = {
   contact: ShopContact;
   location: ShopContactLocation;
 };
+
+export type ShopProfileResponse = {
+  id: number;
+  slug: string;
+  displayName: string;
+  homeHeadline: string;
+  homeDescription: string;
+  contactIntro: string;
+  logoImageUrl: string;
+  heroImageUrl: string;
+  contactDetails: ShopContactDetailsResponse;
+  openingHours: ShopOpeningHourResponse[];
+};
+
+export type ShopContactDetailsResponse = {
+  phoneNumber: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  region: string | null;
+  postalCode: string;
+  country: string;
+  mapUrl: string | null;
+};
+
+export type ShopOpeningHourResponse = {
+  id: number;
+  dayOfWeek: string;
+  opensAt: string | null;
+  closesAt: string | null;
+  isClosed: boolean;
+  note: string | null;
+};

@@ -1,5 +1,7 @@
-import type { ShopContactPageData } from "../types";
+import type { ShopContactPageData, ShopProfileResponse } from "../types";
 import { mockShopContact } from "./mock-shop-contact";
+import { fetchShopProfileWithFallback } from "./shop-profile-api";
+import { getOpenDaysSummary, mapShopProfileContact } from "./shop-profile-mappers";
 
 const mockContactPageData = {
   hero: {
@@ -37,5 +39,45 @@ const mockContactPageData = {
 } satisfies ShopContactPageData;
 
 export async function getContactPageData(): Promise<ShopContactPageData> {
-  return mockContactPageData;
+  const shopProfile = await fetchShopProfileWithFallback();
+
+  return shopProfile ? mapShopProfileToContactPageData(shopProfile) : mockContactPageData;
+}
+
+function mapShopProfileToContactPageData(profile: ShopProfileResponse): ShopContactPageData {
+  const contact = mapShopProfileContact(profile);
+
+  return {
+    hero: {
+      eyebrow: mockContactPageData.hero.eyebrow,
+      title: `Visit ${profile.displayName}.`,
+      lead: profile.contactIntro,
+      facts: [
+        { label: "Kitchen", value: getOpenDaysSummary(contact.hours) },
+        { label: "Collection", value: "Call ahead" },
+        { label: "Area", value: profile.contactDetails.city },
+      ],
+    },
+    contact,
+    location: {
+      label: mockContactPageData.location.label,
+      neighborhood: profile.contactDetails.city,
+      mapLabel: `Map for ${profile.displayName}`,
+      summary: `${profile.displayName} is available for collection and takeaway at ${contact.addressLines.join(", ")}.`,
+      notes: [
+        {
+          label: "Collection counter",
+          body: `Use ${profile.contactDetails.addressLine1} for collection and takeaway service.`,
+        },
+        {
+          label: "Nearby area",
+          body: `Find us in ${profile.contactDetails.city}${profile.contactDetails.postalCode ? `, ${profile.contactDetails.postalCode}` : ""}.`,
+        },
+        {
+          label: "Call ahead",
+          body: `${profile.contactIntro} Call the restaurant before travelling if you need the latest opening update.`,
+        },
+      ],
+    },
+  };
 }
