@@ -59,6 +59,31 @@ public sealed class MenuEndpointsTests
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    [TestMethod]
+    public async Task GetShopProfile_ReturnsDisplayDataForHomeAndContactPages()
+    {
+        await using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        var profile = await client.GetFromJsonAsync<ShopProfileResponse>("/api/menu/shop");
+
+        Assert.IsNotNull(profile);
+        Assert.AreEqual("firefly", profile.Slug);
+        Assert.AreEqual("Firefly Restaurant", profile.DisplayName);
+        Assert.AreEqual("Seasonal cooking by the river", profile.HomeHeadline);
+        Assert.AreEqual("https://images.example.invalid/shop/logo.png", profile.LogoImageUrl);
+        Assert.AreEqual("020 7946 0100", profile.ContactDetails.PhoneNumber);
+        Assert.AreEqual("10 Firefly Lane", profile.ContactDetails.AddressLine1);
+        Assert.HasCount(2, profile.OpeningHours);
+        Assert.AreEqual("Monday", profile.OpeningHours[0].DayOfWeek);
+        Assert.AreEqual(new TimeOnly(17, 0), profile.OpeningHours[0].OpensAt);
+        Assert.AreEqual(new TimeOnly(22, 0), profile.OpeningHours[0].ClosesAt);
+        Assert.IsFalse(profile.OpeningHours[0].IsClosed);
+        Assert.AreEqual("Sunday", profile.OpeningHours[1].DayOfWeek);
+        Assert.IsTrue(profile.OpeningHours[1].IsClosed);
+        Assert.IsNull(profile.OpeningHours[1].OpensAt);
+    }
+
     private static WebApplicationFactory<Program> CreateFactory()
     {
         return new WebApplicationFactory<Program>()
@@ -132,6 +157,42 @@ public sealed class MenuEndpointsTests
                 ])
         ];
 
+        private static readonly ShopProfileReadModel ShopProfile = new(
+            Id: 1,
+            Slug: "firefly",
+            DisplayName: "Firefly Restaurant",
+            HomeHeadline: "Seasonal cooking by the river",
+            HomeDescription: "A warm neighborhood restaurant.",
+            ContactIntro: "Visit us for dinner.",
+            LogoImageUrl: "https://images.example.invalid/shop/logo.png",
+            HeroImageUrl: "https://images.example.invalid/shop/hero.jpg",
+            ContactDetails: new ShopContactDetailsReadModel(
+                PhoneNumber: "020 7946 0100",
+                AddressLine1: "10 Firefly Lane",
+                AddressLine2: null,
+                City: "London",
+                Region: null,
+                PostalCode: "SE1 1AA",
+                Country: "United Kingdom",
+                MapUrl: "https://maps.example.invalid/firefly"),
+            OpeningHours:
+            [
+                new(
+                    Id: 1,
+                    DayOfWeek: DayOfWeek.Monday,
+                    OpensAt: new TimeOnly(17, 0),
+                    ClosesAt: new TimeOnly(22, 0),
+                    IsClosed: false,
+                    Note: null),
+                new(
+                    Id: 2,
+                    DayOfWeek: DayOfWeek.Sunday,
+                    OpensAt: null,
+                    ClosesAt: null,
+                    IsClosed: true,
+                    Note: "Private events")
+            ]);
+
         public Task<IReadOnlyList<MenuCategoryReadModel>> GetMenuCategoriesAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult(Categories);
@@ -144,6 +205,11 @@ public sealed class MenuEndpointsTests
                 .SingleOrDefault(menuItem => string.Equals(menuItem.Slug, slug, StringComparison.Ordinal));
 
             return Task.FromResult(item);
+        }
+
+        public Task<ShopProfileReadModel?> GetShopProfileAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<ShopProfileReadModel?>(ShopProfile);
         }
     }
 
@@ -170,4 +236,34 @@ public sealed class MenuEndpointsTests
         int Id,
         string Value,
         string Color);
+
+    private sealed record ShopProfileResponse(
+        int Id,
+        string Slug,
+        string DisplayName,
+        string HomeHeadline,
+        string HomeDescription,
+        string ContactIntro,
+        string LogoImageUrl,
+        string HeroImageUrl,
+        ShopContactDetailsResponse ContactDetails,
+        List<ShopOpeningHourResponse> OpeningHours);
+
+    private sealed record ShopContactDetailsResponse(
+        string PhoneNumber,
+        string AddressLine1,
+        string? AddressLine2,
+        string City,
+        string? Region,
+        string PostalCode,
+        string Country,
+        string? MapUrl);
+
+    private sealed record ShopOpeningHourResponse(
+        int Id,
+        string DayOfWeek,
+        TimeOnly? OpensAt,
+        TimeOnly? ClosesAt,
+        bool IsClosed,
+        string? Note);
 }

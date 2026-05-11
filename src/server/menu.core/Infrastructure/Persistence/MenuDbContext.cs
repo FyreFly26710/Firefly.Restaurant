@@ -14,11 +14,17 @@ public sealed class MenuDbContext(DbContextOptions<MenuDbContext> options) : DbC
 
     public DbSet<MenuItemTag> MenuItemTags => Set<MenuItemTag>();
 
+    public DbSet<ShopProfile> ShopProfiles => Set<ShopProfile>();
+
+    public DbSet<ShopOpeningHour> ShopOpeningHours => Set<ShopOpeningHour>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigureMenuCategory(modelBuilder.Entity<MenuCategory>());
         ConfigureMenuItem(modelBuilder.Entity<MenuItem>());
         ConfigureMenuItemTag(modelBuilder.Entity<MenuItemTag>());
+        ConfigureShopProfile(modelBuilder.Entity<ShopProfile>());
+        ConfigureShopOpeningHour(modelBuilder.Entity<ShopOpeningHour>());
     }
 
     private static void ConfigureMenuCategory(EntityTypeBuilder<MenuCategory> category)
@@ -149,4 +155,141 @@ public sealed class MenuDbContext(DbContextOptions<MenuDbContext> options) : DbC
             .IsUnique();
     }
 
+    private static void ConfigureShopProfile(EntityTypeBuilder<ShopProfile> profile)
+    {
+        profile.ToTable("shop_profiles");
+
+        profile.HasKey(shopProfile => shopProfile.Id);
+
+        profile.Property(shopProfile => shopProfile.Id)
+            .HasColumnName("id");
+
+        profile.Property(shopProfile => shopProfile.Slug)
+            .HasColumnName("slug")
+            .HasMaxLength(64)
+            .IsRequired();
+
+        profile.HasIndex(shopProfile => shopProfile.Slug)
+            .IsUnique();
+
+        profile.Property(shopProfile => shopProfile.DisplayName)
+            .HasColumnName("display_name")
+            .HasMaxLength(160)
+            .IsRequired();
+
+        profile.Property(shopProfile => shopProfile.HomeHeadline)
+            .HasColumnName("home_headline")
+            .HasMaxLength(160)
+            .IsRequired();
+
+        profile.Property(shopProfile => shopProfile.HomeDescription)
+            .HasColumnName("home_description")
+            .HasMaxLength(1024)
+            .IsRequired();
+
+        profile.Property(shopProfile => shopProfile.ContactIntro)
+            .HasColumnName("contact_intro")
+            .HasMaxLength(512)
+            .IsRequired();
+
+        profile.Property(shopProfile => shopProfile.LogoImageUrl)
+            .HasColumnName("logo_image_url")
+            .HasMaxLength(2048)
+            .IsRequired();
+
+        profile.Property(shopProfile => shopProfile.HeroImageUrl)
+            .HasColumnName("hero_image_url")
+            .HasMaxLength(2048)
+            .IsRequired();
+
+        profile.OwnsOne(
+            shopProfile => shopProfile.ContactDetails,
+            contactDetails =>
+            {
+                contactDetails.Property(details => details.PhoneNumber)
+                    .HasColumnName("contact_phone_number")
+                    .HasMaxLength(64)
+                    .IsRequired();
+
+                contactDetails.Property(details => details.AddressLine1)
+                    .HasColumnName("contact_address_line1")
+                    .HasMaxLength(160)
+                    .IsRequired();
+
+                contactDetails.Property(details => details.AddressLine2)
+                    .HasColumnName("contact_address_line2")
+                    .HasMaxLength(160);
+
+                contactDetails.Property(details => details.City)
+                    .HasColumnName("contact_city")
+                    .HasMaxLength(120)
+                    .IsRequired();
+
+                contactDetails.Property(details => details.Region)
+                    .HasColumnName("contact_region")
+                    .HasMaxLength(120);
+
+                contactDetails.Property(details => details.PostalCode)
+                    .HasColumnName("contact_postal_code")
+                    .HasMaxLength(32)
+                    .IsRequired();
+
+                contactDetails.Property(details => details.Country)
+                    .HasColumnName("contact_country")
+                    .HasMaxLength(120)
+                    .IsRequired();
+
+                contactDetails.Property(details => details.MapUrl)
+                    .HasColumnName("contact_map_url")
+                    .HasMaxLength(2048);
+            });
+
+        profile.Navigation(shopProfile => shopProfile.ContactDetails)
+            .IsRequired();
+
+        profile.HasMany(shopProfile => shopProfile.OpeningHours)
+            .WithOne(openingHour => openingHour.ShopProfile)
+            .HasForeignKey(openingHour => openingHour.ShopProfileId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        profile.Navigation(shopProfile => shopProfile.OpeningHours)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+    }
+
+    private static void ConfigureShopOpeningHour(EntityTypeBuilder<ShopOpeningHour> openingHour)
+    {
+        openingHour.ToTable("shop_opening_hours");
+
+        openingHour.HasKey(shopOpeningHour => shopOpeningHour.Id);
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.Id)
+            .HasColumnName("id");
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.ShopProfileId)
+            .HasColumnName("shop_profile_id")
+            .IsRequired();
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.DayOfWeek)
+            .HasColumnName("day_of_week")
+            .HasConversion<int>()
+            .IsRequired();
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.OpensAt)
+            .HasColumnName("opens_at");
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.ClosesAt)
+            .HasColumnName("closes_at");
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.IsClosed)
+            .HasColumnName("is_closed")
+            .IsRequired();
+
+        openingHour.Property(shopOpeningHour => shopOpeningHour.Note)
+            .HasColumnName("note")
+            .HasMaxLength(160);
+
+        openingHour.HasIndex(shopOpeningHour => new { shopOpeningHour.ShopProfileId, shopOpeningHour.DayOfWeek })
+            .IsUnique();
+    }
 }

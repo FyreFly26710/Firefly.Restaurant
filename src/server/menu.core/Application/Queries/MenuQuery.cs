@@ -38,6 +38,20 @@ internal sealed class MenuQuery(MenuDbContext dbContext) : IMenuQueryService
             : ToReadModel(item);
     }
 
+    public async Task<ShopProfileReadModel?> GetShopProfileAsync(CancellationToken cancellationToken = default)
+    {
+        var profile = await dbContext.ShopProfiles
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(shopProfile => shopProfile.OpeningHours)
+            .OrderBy(shopProfile => shopProfile.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return profile is null
+            ? null
+            : ToReadModel(profile);
+    }
+
     private static MenuCategoryReadModel ToReadModel(MenuCategory category)
     {
         return new MenuCategoryReadModel(
@@ -76,5 +90,42 @@ internal sealed class MenuQuery(MenuDbContext dbContext) : IMenuQueryService
             Id: tag.Id,
             Value: tag.Value,
             Color: tag.Color);
+    }
+
+    private static ShopProfileReadModel ToReadModel(ShopProfile profile)
+    {
+        return new ShopProfileReadModel(
+            Id: profile.Id,
+            Slug: profile.Slug,
+            DisplayName: profile.DisplayName,
+            HomeHeadline: profile.HomeHeadline,
+            HomeDescription: profile.HomeDescription,
+            ContactIntro: profile.ContactIntro,
+            LogoImageUrl: profile.LogoImageUrl,
+            HeroImageUrl: profile.HeroImageUrl,
+            ContactDetails: new ShopContactDetailsReadModel(
+                PhoneNumber: profile.ContactDetails.PhoneNumber,
+                AddressLine1: profile.ContactDetails.AddressLine1,
+                AddressLine2: profile.ContactDetails.AddressLine2,
+                City: profile.ContactDetails.City,
+                Region: profile.ContactDetails.Region,
+                PostalCode: profile.ContactDetails.PostalCode,
+                Country: profile.ContactDetails.Country,
+                MapUrl: profile.ContactDetails.MapUrl),
+            OpeningHours: profile.OpeningHours
+                .OrderBy(openingHour => openingHour.DayOfWeek)
+                .Select(ToReadModel)
+                .ToArray());
+    }
+
+    private static ShopOpeningHourReadModel ToReadModel(ShopOpeningHour openingHour)
+    {
+        return new ShopOpeningHourReadModel(
+            Id: openingHour.Id,
+            DayOfWeek: openingHour.DayOfWeek,
+            OpensAt: openingHour.OpensAt,
+            ClosesAt: openingHour.ClosesAt,
+            IsClosed: openingHour.IsClosed,
+            Note: openingHour.Note);
     }
 }

@@ -1,4 +1,5 @@
 using Firefly.Restaurant.Menu.Core.Domain.Entities;
+using Firefly.Restaurant.Menu.Core.Domain.ValueObjects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
@@ -147,6 +148,8 @@ public sealed class MenuDbContextSeed : IDbSeeder<MenuDbContext>
 
     public async Task SeedAsync(MenuDbContext context)
     {
+        await SeedShopProfileAsync(context);
+
         var seedCategorySlugs = Categories
             .Select(category => category.Slug)
             .ToArray();
@@ -171,6 +174,46 @@ public sealed class MenuDbContextSeed : IDbSeeder<MenuDbContext>
         {
             context.MenuCategories.Add(CreateCategory(categorySeed));
         }
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedShopProfileAsync(MenuDbContext context)
+    {
+        const string shopSlug = "firefly";
+
+        if (await context.ShopProfiles.AnyAsync(profile => profile.Slug == shopSlug))
+        {
+            return;
+        }
+
+        var profile = new ShopProfile(
+            slug: shopSlug,
+            displayName: "Firefly Restaurant",
+            homeHeadline: "Fresh Chinese takeaway, cooked to order.",
+            homeDescription: "Browse a generous menu of Chinese takeaway favourites, from crisp appetisers to wok-fried mains, rice, noodles, sides, and sauces.",
+            contactIntro: "Find us locally for collection and takeaway service.",
+            logoImageUrl: "https://images.example.invalid/shop/firefly-logo.png",
+            heroImageUrl: "https://images.example.invalid/shop/firefly-hero.jpg",
+            contactDetails: new ShopContactDetails(
+                phoneNumber: "020 7946 0100",
+                addressLine1: "10 Firefly Lane",
+                addressLine2: null,
+                city: "London",
+                region: null,
+                postalCode: "SE1 1AA",
+                country: "United Kingdom",
+                mapUrl: "https://maps.example.invalid/firefly"));
+
+        profile.AddClosedDay(DayOfWeek.Monday);
+        profile.AddOpeningHour(DayOfWeek.Tuesday, new TimeOnly(16, 30), new TimeOnly(22, 0));
+        profile.AddOpeningHour(DayOfWeek.Wednesday, new TimeOnly(16, 30), new TimeOnly(22, 0));
+        profile.AddOpeningHour(DayOfWeek.Thursday, new TimeOnly(16, 30), new TimeOnly(22, 0));
+        profile.AddOpeningHour(DayOfWeek.Friday, new TimeOnly(16, 30), new TimeOnly(22, 30));
+        profile.AddOpeningHour(DayOfWeek.Saturday, new TimeOnly(12, 0), new TimeOnly(22, 30));
+        profile.AddOpeningHour(DayOfWeek.Sunday, new TimeOnly(12, 0), new TimeOnly(21, 30));
+
+        context.ShopProfiles.Add(profile);
 
         await context.SaveChangesAsync();
     }

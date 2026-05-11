@@ -17,6 +17,9 @@ public static class MenuApi
         group.MapGet("items/{slug}", GetMenuItemBySlugAsync)
             .WithName("GetMenuItemBySlug");
 
+        group.MapGet("shop", GetShopProfileAsync)
+            .WithName("GetShopProfile");
+
         return endpoints;
     }
 
@@ -42,5 +45,16 @@ public static class MenuApi
         return item is null
             ? TypedResults.NotFound()
             : TypedResults.Ok(item.ToResponse());
+    }
+
+    private static async Task<Results<Ok<ShopProfileResponse>, NotFound>> GetShopProfileAsync(
+        IMenuQueryService menuQueryService,
+        CancellationToken cancellationToken)
+    {
+        var profile = await menuQueryService.GetShopProfileAsync(cancellationToken);
+
+        return profile is null
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(profile.ToResponse());
     }
 }
