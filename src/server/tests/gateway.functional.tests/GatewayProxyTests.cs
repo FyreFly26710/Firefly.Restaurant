@@ -40,6 +40,22 @@ public sealed class GatewayProxyTests
         Assert.AreEqual("menu-api", response.Headers.GetValues("X-Firefly-Test-Backend").Single());
     }
 
+    [TestMethod]
+    public async Task GetShopProfile_ProxiesRequestToConfiguredMenuApi()
+    {
+        await using var backend = await TestMenuBackend.StartAsync();
+        await using var factory = CreateGatewayFactory(backend.Address);
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("/api/menu/shop");
+        var payload = await response.Content.ReadFromJsonAsync<BackendShopProfileResponse>();
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        Assert.AreEqual("menu-api", response.Headers.GetValues("X-Firefly-Test-Backend").Single());
+        Assert.IsNotNull(payload);
+        Assert.AreEqual("firefly", payload.Slug);
+    }
+
     private static WebApplicationFactory<Program> CreateGatewayFactory(string menuApiAddress)
     {
         return new WebApplicationFactory<Program>()
@@ -58,6 +74,8 @@ public sealed class GatewayProxyTests
     }
 
     private sealed record BackendMenuCategoryResponse(string Slug);
+
+    private sealed record BackendShopProfileResponse(string Slug);
 
     private sealed class TestMenuBackend : IAsyncDisposable
     {
@@ -93,6 +111,13 @@ public sealed class GatewayProxyTests
                 context.Response.Headers.Append("X-Firefly-Test-Backend", "menu-api");
 
                 return Results.NotFound();
+            });
+
+            app.MapGet("/api/menu/shop", (HttpContext context) =>
+            {
+                context.Response.Headers.Append("X-Firefly-Test-Backend", "menu-api");
+
+                return Results.Ok(new BackendShopProfileResponse("firefly"));
             });
 
             await app.StartAsync();

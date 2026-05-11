@@ -34,11 +34,47 @@ internal static class MenuApiMappers
                 .ToList());
     }
 
+    public static ShopProfileResponse ToResponse(this ShopProfileReadModel profile)
+    {
+        return new ShopProfileResponse(
+            Id: profile.Id,
+            Slug: profile.Slug,
+            DisplayName: profile.DisplayName,
+            HomeHeadline: profile.HomeHeadline,
+            HomeDescription: profile.HomeDescription,
+            ContactIntro: profile.ContactIntro,
+            LogoImageUrl: profile.LogoImageUrl,
+            HeroImageUrl: profile.HeroImageUrl,
+            ContactDetails: new ShopContactDetailsResponse(
+                PhoneNumber: profile.ContactDetails.PhoneNumber,
+                AddressLine1: profile.ContactDetails.AddressLine1,
+                AddressLine2: profile.ContactDetails.AddressLine2,
+                City: profile.ContactDetails.City,
+                Region: profile.ContactDetails.Region,
+                PostalCode: profile.ContactDetails.PostalCode,
+                Country: profile.ContactDetails.Country,
+                MapUrl: profile.ContactDetails.MapUrl),
+            OpeningHours: profile.OpeningHours
+                .Select(openingHour => openingHour.ToResponse())
+                .ToList());
+    }
+
     private static ItemTagResponse ToResponse(this MenuItemTagReadModel tag)
     {
         return new ItemTagResponse(
             Id: tag.Id,
             Value: tag.Value,
             Color: tag.Color);
+    }
+
+    private static ShopOpeningHourResponse ToResponse(this ShopOpeningHourReadModel openingHour)
+    {
+        return new ShopOpeningHourResponse(
+            Id: openingHour.Id,
+            DayOfWeek: openingHour.DayOfWeek.ToString(),
+            OpensAt: openingHour.OpensAt,
+            ClosesAt: openingHour.ClosesAt,
+            IsClosed: openingHour.IsClosed,
+            Note: openingHour.Note);
     }
 }
