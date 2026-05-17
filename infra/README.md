@@ -33,8 +33,14 @@ The production compose file therefore runs:
 - `menu-api` as an internal API container.
 - `gateway-api` as the only loopback-published API surface on `127.0.0.1:30000`.
 
-Add future containers such as `user-api` or `admin-app` only after those projects exist
-and a dedicated issue defines their deployment behavior.
+The demo deployment direction also expects a server-hosted Blazor `admin-app`
+container exposed only on a separate loopback port, such as
+`127.0.0.1:30001`, then published through Cloudflare Tunnel with Cloudflare
+Access protection. Add the `admin-app` Dockerfile, image build, compose
+service, deploy workflow steps, and Tunnel route after that project exists.
+
+Add future containers such as `user-api` only after those projects exist and a
+dedicated issue defines their deployment behavior.
 
 ## Runtime Environment Contract
 

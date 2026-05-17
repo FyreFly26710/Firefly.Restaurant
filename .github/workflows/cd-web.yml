@@ -17,6 +17,7 @@ env:
 
 jobs:
   preflight:
+    environment: demo
     runs-on: ubuntu-latest
     outputs:
       ready: ${{ steps.check.outputs.ready }}
@@ -46,6 +47,7 @@ jobs:
   deploy:
     needs: preflight
     if: needs.preflight.outputs.ready == 'true'
+    environment: demo
     runs-on: ubuntu-latest
     defaults:
       run:

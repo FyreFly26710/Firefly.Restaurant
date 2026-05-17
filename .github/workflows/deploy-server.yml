@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   preflight:
-    environment: production
+    environment: demo
     runs-on: ubuntu-latest
     outputs:
       deploy_ready: ${{ steps.deploy.outputs.ready }}
@@ -50,7 +50,7 @@ jobs:
   deploy:
     needs: preflight
     if: needs.preflight.outputs.deploy_ready == 'true'
-    environment: production
+    environment: demo
     runs-on: ubuntu-latest
     env:
       DEPLOY_SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
