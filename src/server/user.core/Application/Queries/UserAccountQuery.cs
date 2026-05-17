@@ -1,24 +1,21 @@
 using System.Security.Cryptography;
 using System.Text;
-using Firefly.Restaurant.User.Core.Application.Authentication;
 using Firefly.Restaurant.User.Core.Domain.Consts;
-using Firefly.Restaurant.User.Core.Domain.Entities;
 using Firefly.Restaurant.User.Core.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace Firefly.Restaurant.User.Core.Infrastructure.Authentication;
+namespace Firefly.Restaurant.User.Core.Application.Queries;
 
-internal sealed class DatabaseUserAuthenticationService(UserDbContext dbContext)
-    : IUserAuthenticationService
+internal sealed class UserAccountQuery(UserDbContext dbContext) : IUserAccountQuery
 {
-    public async Task<AuthenticatedUser?> AuthenticateAsync(
-        AuthenticateUserCommand command,
+    public async Task<VerifiedUserReadModel?> VerifyUserAsync(
+        VerifyUserQuery query,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(query);
 
-        var account = command.Account.Trim();
-        if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(command.Password))
+        var account = query.Account.Trim();
+        if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(query.Password))
         {
             return null;
         }
@@ -28,7 +25,7 @@ internal sealed class DatabaseUserAuthenticationService(UserDbContext dbContext)
             .Where(candidate => candidate.Account.ToLower() == account.ToLower())
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (userAccount is null || !PasswordMatches(command.Password, userAccount.Password))
+        if (userAccount is null || !PasswordMatches(query.Password, userAccount.Password))
         {
             return null;
         }
@@ -39,7 +36,7 @@ internal sealed class DatabaseUserAuthenticationService(UserDbContext dbContext)
             return null;
         }
 
-        return new AuthenticatedUser(
+        return new VerifiedUserReadModel(
             Account: userAccount.Account,
             Role: normalizedRole,
             DisplayName: userAccount.DisplayName);

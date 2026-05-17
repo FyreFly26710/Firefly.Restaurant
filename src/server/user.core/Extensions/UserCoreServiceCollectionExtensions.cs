@@ -1,5 +1,4 @@
-using Firefly.Restaurant.User.Core.Application.Authentication;
-using Firefly.Restaurant.User.Core.Infrastructure.Authentication;
+using Firefly.Restaurant.User.Core.Application.Queries;
 using Firefly.Restaurant.User.Core.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +18,7 @@ public static class UserCoreServiceCollectionExtensions
         services.AddDbContext<UserDbContext>(options =>
             options.UseNpgsql(userConnectionString));
 
-        services.TryAddScoped<IUserAuthenticationService, DatabaseUserAuthenticationService>();
+        services.TryAddScoped<IUserAccountQuery, UserAccountQuery>();
 
         return services;
     }

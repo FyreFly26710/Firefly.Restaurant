@@ -11,5 +11,6 @@
   <Project Path="gateway.api/gateway.api.csproj" />
   <Project Path="menu.api/menu.api.csproj" />
   <Project Path="menu.core/menu.core.csproj" />
+  <Project Path="user.api/user.api.csproj" />
   <Project Path="user.core/user.core.csproj" />
 </Solution>

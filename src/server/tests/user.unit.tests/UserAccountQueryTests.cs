@@ -1,17 +1,16 @@
-using Firefly.Restaurant.User.Core.Application.Authentication;
+using Firefly.Restaurant.User.Core.Application.Queries;
 using Firefly.Restaurant.User.Core.Domain.Consts;
 using Firefly.Restaurant.User.Core.Domain.Entities;
-using Firefly.Restaurant.User.Core.Infrastructure.Authentication;
 using Firefly.Restaurant.User.Core.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firefly.Restaurant.User.UnitTests;
 
 [TestClass]
-public sealed class UserAuthenticationServiceTests
+public sealed class UserAccountQueryTests
 {
     [TestMethod]
-    public async Task AuthenticateAsync_ReturnsUserForStoredUserCredentials()
+    public async Task VerifyUserAsync_ReturnsUserForStoredCredentials()
     {
         await using var context = CreateDbContext();
         context.UserAccounts.Add(new UserAccount(
@@ -20,9 +19,9 @@ public sealed class UserAuthenticationServiceTests
             role: UserRoles.User,
             displayName: "Restaurant User"));
         await context.SaveChangesAsync();
-        var service = new DatabaseUserAuthenticationService(context);
+        var query = new UserAccountQuery(context);
 
-        var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
+        var user = await query.VerifyUserAsync(new VerifyUserQuery(
             Account: "user",
             Password: "user-password"));
 
@@ -33,13 +32,13 @@ public sealed class UserAuthenticationServiceTests
     }
 
     [TestMethod]
-    public async Task AuthenticateAsync_ReturnsAdminFromSeededDemoCredentials()
+    public async Task VerifyUserAsync_ReturnsAdminFromSeededDemoCredentials()
     {
         await using var context = CreateDbContext();
         await new UserDbContextSeed().SeedAsync(context);
-        var service = new DatabaseUserAuthenticationService(context);
+        var query = new UserAccountQuery(context);
 
-        var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
+        var user = await query.VerifyUserAsync(new VerifyUserQuery(
             Account: "admin",
             Password: "admin"));
 
@@ -50,13 +49,13 @@ public sealed class UserAuthenticationServiceTests
     }
 
     [TestMethod]
-    public async Task AuthenticateAsync_MatchesAccountCaseInsensitively()
+    public async Task VerifyUserAsync_MatchesAccountCaseInsensitively()
     {
         await using var context = CreateDbContext();
         await new UserDbContextSeed().SeedAsync(context);
-        var service = new DatabaseUserAuthenticationService(context);
+        var query = new UserAccountQuery(context);
 
-        var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
+        var user = await query.VerifyUserAsync(new VerifyUserQuery(
             Account: " Admin ",
             Password: "admin"));
 
@@ -66,16 +65,16 @@ public sealed class UserAuthenticationServiceTests
     }
 
     [TestMethod]
-    public async Task AuthenticateAsync_ReturnsNullForInvalidCredentials()
+    public async Task VerifyUserAsync_ReturnsNullForInvalidCredentials()
     {
         await using var context = CreateDbContext();
         await new UserDbContextSeed().SeedAsync(context);
-        var service = new DatabaseUserAuthenticationService(context);
+        var query = new UserAccountQuery(context);
 
-        var wrongPassword = await service.AuthenticateAsync(new AuthenticateUserCommand(
+        var wrongPassword = await query.VerifyUserAsync(new VerifyUserQuery(
             Account: "admin",
             Password: "wrong-password"));
-        var missingAccount = await service.AuthenticateAsync(new AuthenticateUserCommand(
+        var missingAccount = await query.VerifyUserAsync(new VerifyUserQuery(
             Account: "missing",
             Password: "admin"));
 
@@ -84,7 +83,7 @@ public sealed class UserAuthenticationServiceTests
     }
 
     [TestMethod]
-    public async Task AuthenticateAsync_IgnoresAccountsWithoutKnownRoles()
+    public async Task VerifyUserAsync_IgnoresAccountsWithoutKnownRoles()
     {
         await using var context = CreateDbContext();
         context.UserAccounts.Add(new UserAccount(
@@ -93,9 +92,9 @@ public sealed class UserAuthenticationServiceTests
             role: "operator",
             displayName: "Operator"));
         await context.SaveChangesAsync();
-        var service = new DatabaseUserAuthenticationService(context);
+        var query = new UserAccountQuery(context);
 
-        var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
+        var user = await query.VerifyUserAsync(new VerifyUserQuery(
             Account: "operator",
             Password: "operator-password"));
 
