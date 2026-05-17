@@ -1,9 +1,0 @@
-@user_api_HostAddress = http://localhost:5208
-
-POST {{user_api_HostAddress}}/api/users/login
-Content-Type: application/json
-
-{
-  "account": "user",
-  "password": "user"
-}
