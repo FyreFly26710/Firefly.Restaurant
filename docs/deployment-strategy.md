@@ -4,12 +4,24 @@ This document records the deployment strategy for Firefly Restaurant.
 The current implementation uses Cloudflare Pages for the static storefront and
 Docker Compose on the Mac server for the API runtime.
 
+## Active Public Target
+
+The active public deployment target is the demo environment. Customer or
+venue-specific production hostnames should stay detached until the product is
+ready for production launch.
+
+The GitHub Actions deployment workflows read deployment secrets from the
+`demo` GitHub Environment. Keep Cloudflare Pages project names, custom
+domains, Tunnel ids, and real API base URLs in Cloudflare and GitHub Secrets
+rather than in tracked files.
+
 ## Goals
 
 - Keep public storefront browsing fast, static-first, and Cloudflare-cacheable.
 - Keep the .NET server on the Mac server, packaged with Docker.
-- Keep Blazor admin private and off public hostnames.
-- Expose public API traffic through Cloudflare Tunnel only when an issue explicitly requires it.
+- Keep Blazor admin protected before it is exposed on any hostname.
+- Expose public API and protected admin traffic through Cloudflare Tunnel only
+  when each route is explicitly required and documented.
 - Stay close to the Firefly Signal deployment model so local operations remain familiar.
 
 ## Environments
@@ -32,7 +44,22 @@ Docker Compose on the Mac server for the API runtime.
 - Host the public storefront on Cloudflare Pages first.
 - Run server containers on the Mac server with Docker Compose.
 - Publish only the gateway loopback port through a machine-managed Cloudflare Tunnel when public API access is required.
-- Keep admin access local to the Mac server or available through SSH forwarding unless a future issue defines a protected private access path.
+- Publish the Blazor admin only as a loopback-bound service behind Cloudflare
+  Tunnel and Cloudflare Access when a future issue or documented demo cutover
+  defines that protected access path.
+
+### Demo
+
+- Use the demo Cloudflare Pages custom domain for the public storefront.
+- Use the demo public API hostname only for the Cloudflare Tunnel route that
+  targets the loopback-published `gateway-api`.
+- Use the demo admin hostname for the server-hosted Blazor admin deployment
+  through Cloudflare Tunnel after the `admin-app` runtime exists. The route
+  must be protected with Cloudflare Access and the app's own authentication and
+  authorization before it serves real admin operations.
+- Remove old venue or customer hostnames from the Cloudflare Pages custom
+  domain list, Cloudflare Tunnel public hostnames, and GitHub deployment
+  secrets while this environment is serving the demo site.
 
 ## Deployment Boundaries
 
@@ -78,13 +105,14 @@ Keep these services internal to Docker networking or loopback:
 
 - `menu-api`
 - `user-api`
-- `admin-app`
 - PostgreSQL
 - Redis
 - RabbitMQ
 
 Publish only `gateway-api` to a loopback port such as `127.0.0.1:<port>` when public API access is required.
-Cloudflare Tunnel maps public API hostnames to that local gateway.
+Publish `admin-app` only to a separate loopback port when protected admin
+access is required. Cloudflare Tunnel maps public API hostnames to the local
+gateway and protected admin hostnames to the local Blazor admin service.
 
 Do not expose public router ports for the server.
 Cloudflare Tunnel remains machine-managed and out of the tracked repository.
@@ -96,11 +124,14 @@ Blazor admin is private by default.
 
 Do not create:
 
-- a public admin hostname,
-- a default Tunnel route for admin,
-- a default Cloudflare Access route for admin.
+- an unprotected public admin hostname,
+- a Tunnel route for admin without Cloudflare Access protection,
+- a default Cloudflare Access route for admin that has not been tied to the
+  documented admin access model.
 
-Use local Mac access or SSH forwarding for admin operations unless a future issue explicitly defines a protected private access model.
+Use local Mac access or SSH forwarding for admin operations unless a future issue
+or documented demo cutover explicitly defines the protected Cloudflare
+Tunnel-backed admin access model.
 If that changes, document authentication, authorization, audit logging, rate limiting, and recovery behavior in the issue and docs.
 
 ## Media And CDN Behavior
@@ -139,6 +170,15 @@ Cloudflare Pages deployment.
 
 Use preflight checks for required secrets so missing deployment secrets skip deploy jobs cleanly or fail with a clear message before side effects.
 
+Deployment workflows use the GitHub Environment named `demo`:
+
+- `cd-web.yml` deploys the Cloudflare Pages storefront with demo environment
+  secrets.
+- `deploy-server.yml` deploys the Mac server runtime with demo environment
+  secrets.
+- `cd-server-images.yml` remains environment-neutral because it only builds
+  and publishes reusable Docker images.
+
 `deploy-server.yml` currently represents the desired GitHub-operated server
 deploy path, but GitHub-hosted runner SSH reachability to the Mac server has
 timed out. The durable path should be a self-hosted runner on the Mac server or
@@ -166,6 +206,7 @@ Mac server deployment secrets:
 - `DEPLOY_SSH_USERNAME`
 - `DEPLOY_SSH_PRIVATE_KEY`
 - `DEPLOY_REMOTE_PATH`
+- `FIREFLY_ADMIN_BASE_URL`
 
 Runtime secrets:
 
@@ -175,6 +216,10 @@ Runtime secrets:
 
 Future runtime secrets should be introduced only when the owning app needs them.
 Examples include authentication signing keys, revalidation tokens, and provider credentials.
+
+For the current demo cutover, store these values in the GitHub Environment
+named `demo`. Replace any previous venue or customer values there instead of
+adding parallel production-style secrets for the demo target.
 
 Never commit Tunnel credentials, production `.env` files, SSH keys, API tokens, or database backups.
 Do not commit production hostnames, Pages project identifiers, Tunnel ids, or API hostnames in public issue/PR text or tracked docs.
