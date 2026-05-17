@@ -1,0 +1,217 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Firefly Admin</PageTitle>
+
+@if (Dashboard is null)
+{
+    <main class="loading-shell">
+        <span class="loading-mark">F</span>
+        <span>Loading admin demo</span>
+    </main>
+}
+else
+{
+    <div class="admin-shell">
+        <aside class="admin-sidebar" aria-label="Admin navigation">
+            <div class="brand-row">
+                <span class="brand-mark">F</span>
+                <div>
+                    <span class="brand-name">Firefly</span>
+                    <span class="brand-role">Admin demo</span>
+                </div>
+            </div>
+
+            <nav class="nav-stack">
+                <a href="#overview" class="nav-link active"><span>01</span>Overview</a>
+                <a href="#menu" class="nav-link"><span>02</span>Menu items</a>
+                <a href="#shop" class="nav-link"><span>03</span>Shop details</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <span class="avatar">AD</span>
+                <div>
+                    <strong>Admin user</strong>
+                    <small>Local demo data</small>
+                </div>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-topbar">
+                <div>
+                    <p class="eyebrow">Private admin surface</p>
+                    <h1>Menu and shop controls</h1>
+                </div>
+                <div class="topbar-status">
+                    <span>@Dashboard.MenuItems.Count menu items</span>
+                    <span>@Dashboard.Shop.DisplayName</span>
+                </div>
+            </header>
+
+            @if (!string.IsNullOrWhiteSpace(StatusMessage))
+            {
+                <div class="status-banner" role="status">@StatusMessage</div>
+            }
+
+            <section id="overview" class="metric-grid" aria-label="Admin summary">
+                <div class="metric">
+                    <span class="label">Available items</span>
+                    <strong>@Dashboard.AvailableItemCount</strong>
+                    <span>@UnavailableItemCount unavailable</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Menu groups</span>
+                    <strong>@Dashboard.Categories.Count</strong>
+                    <span>Local demo categories</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Shop profile</span>
+                    <strong>@Dashboard.Shop.OpeningHours.Count</strong>
+                    <span>Opening-hour rows</span>
+                </div>
+            </section>
+
+            <section id="menu" class="work-section">
+                <div class="section-head">
+                    <div>
+                        <p class="eyebrow">Catalogue</p>
+                        <h2>Menu items</h2>
+                    </div>
+                    <div class="category-tabs" role="tablist" aria-label="Menu category filter">
+                        <button class="@GetCategoryButtonClass(null)" type="button" @onclick="() => SelectCategory(null)">All</button>
+                        @foreach (var category in Dashboard.Categories)
+                        {
+                            <button class="@GetCategoryButtonClass(category.Id)" type="button" @onclick="() => SelectCategory(category.Id)">
+                                @category.DisplayName
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Dish</th>
+                                <th>Category</th>
+                                <th>Tags</th>
+                                <th class="numeric">Price</th>
+                                <th>Available</th>
+                                <th class="actions-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in FilteredItems)
+                            {
+                                var form = MenuForms[item.Id];
+                                <tr>
+                                    <td>
+                                        <input class="table-input strong" @bind="form.Name" aria-label="Dish name" />
+                                        <textarea class="table-input description" @bind="form.Description" aria-label="Dish description"></textarea>
+                                    </td>
+                                    <td>
+                                        <select class="table-input" @bind="form.CategoryId" aria-label="Menu category">
+                                            @foreach (var category in Dashboard.Categories)
+                                            {
+                                                <option value="@category.Id">@category.DisplayName</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input class="table-input" @bind="form.Tags" aria-label="Comma separated tags" />
+                                    </td>
+                                    <td class="numeric">
+                                        <input class="table-input price-input" type="number" step="0.01" min="0" @bind="form.Price" aria-label="Price" />
+                                    </td>
+                                    <td>
+                                        <label class="toggle-row">
+                                            <input type="checkbox" checked="@form.Available" @onchange="eventArgs => ToggleAvailabilityAsync(item.Id, eventArgs)" />
+                                            <span>@(form.Available ? "On menu" : "Hidden")</span>
+                                        </label>
+                                    </td>
+                                    <td class="actions-col">
+                                        <button class="btn primary" type="button" @onclick="() => SaveMenuItemAsync(item.Id)">Save</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="shop" class="work-section shop-layout">
+                <div class="shop-editor">
+                    <div class="section-head stacked">
+                        <p class="eyebrow">Public profile</p>
+                        <h2>Shop details</h2>
+                    </div>
+
+                    <div class="form-grid">
+                        <label>
+                            <span>Restaurant name</span>
+                            <input @bind="ShopForm.DisplayName" />
+                        </label>
+                        <label>
+                            <span>Tagline</span>
+                            <input @bind="ShopForm.Tagline" />
+                        </label>
+                        <label class="full">
+                            <span>Home headline</span>
+                            <input @bind="ShopForm.HomeHeadline" />
+                        </label>
+                        <label class="full">
+                            <span>Home description</span>
+                            <textarea @bind="ShopForm.HomeDescription"></textarea>
+                        </label>
+                        <label class="full">
+                            <span>Contact intro</span>
+                            <textarea @bind="ShopForm.ContactIntro"></textarea>
+                        </label>
+                        <label>
+                            <span>Phone</span>
+                            <input @bind="ShopForm.PhoneNumber" />
+                        </label>
+                        <label>
+                            <span>Postcode</span>
+                            <input @bind="ShopForm.PostalCode" />
+                        </label>
+                        <label>
+                            <span>Address</span>
+                            <input @bind="ShopForm.AddressLine1" />
+                        </label>
+                        <label>
+                            <span>City</span>
+                            <input @bind="ShopForm.City" />
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn primary" type="button" @onclick="SaveShopAsync">Save shop details</button>
+                        <button class="btn" type="button" @onclick="ResetFormsFromDashboard">Reset local edits</button>
+                    </div>
+                </div>
+
+                <aside class="shop-preview" aria-label="Shop preview">
+                    <p class="eyebrow">Preview</p>
+                    <h3>@ShopForm.DisplayName</h3>
+                    <strong>@ShopForm.HomeHeadline</strong>
+                    <p>@ShopForm.HomeDescription</p>
+                    <div class="contact-preview">
+                        <span>@ShopForm.PhoneNumber</span>
+                        <span>@ShopForm.AddressLine1, @ShopForm.City @ShopForm.PostalCode</span>
+                    </div>
+                    <div class="hours-list">
+                        @foreach (var openingHour in Dashboard.Shop.OpeningHours)
+                        {
+                            <div>
+                                <span>@openingHour.DayLabel</span>
+                                <strong>@(openingHour.IsClosed ? "Closed" : $"{openingHour.OpensAt}-{openingHour.ClosesAt}")</strong>
+                            </div>
+                        }
+                    </div>
+                </aside>
+            </section>
+        </main>
+    </div>
+}
