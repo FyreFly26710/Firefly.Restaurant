@@ -206,6 +206,7 @@ Mac server deployment secrets:
 - `DEPLOY_SSH_USERNAME`
 - `DEPLOY_SSH_PRIVATE_KEY`
 - `DEPLOY_REMOTE_PATH`
+- `FIREFLY_ADMIN_BASE_URL`
 
 Runtime secrets:
 

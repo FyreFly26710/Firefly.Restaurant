@@ -32,9 +32,10 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+          FIREFLY_ADMIN_BASE_URL: ${{ secrets.FIREFLY_ADMIN_BASE_URL }}
         run: |
           missing=""
-          for name in DEPLOY_SSH_HOST DEPLOY_SSH_PORT DEPLOY_SSH_USERNAME DEPLOY_SSH_PRIVATE_KEY DEPLOY_REMOTE_PATH DOCKERHUB_NAMESPACE POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB FIREFLY_MENU_API_BASE_URL; do
+          for name in DEPLOY_SSH_HOST DEPLOY_SSH_PORT DEPLOY_SSH_USERNAME DEPLOY_SSH_PRIVATE_KEY DEPLOY_REMOTE_PATH DOCKERHUB_NAMESPACE POSTGRES_USER POSTGRES_PASSWORD POSTGRES_DB FIREFLY_MENU_API_BASE_URL FIREFLY_ADMIN_BASE_URL; do
             if [ -z "$(printenv "$name")" ]; then
               missing="$missing $name"
             fi
@@ -62,6 +63,7 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       FIREFLY_MENU_API_BASE_URL: ${{ secrets.FIREFLY_MENU_API_BASE_URL }}
+      FIREFLY_ADMIN_BASE_URL: ${{ secrets.FIREFLY_ADMIN_BASE_URL }}
       IMAGE_TAG: ${{ inputs.image_tag }}
 
     steps:
@@ -115,9 +117,9 @@ jobs:
             cd ${DEPLOY_REMOTE_PATH}
             echo Deploying Firefly Restaurant server image tag: ${IMAGE_TAG}
             docker compose -f docker-compose.production.yml --env-file .env up -d postgres
-            docker compose -f docker-compose.production.yml --env-file .env pull gateway-api menu-api
-            docker compose -f docker-compose.production.yml --env-file .env up -d menu-api gateway-api
-            docker compose -f docker-compose.production.yml --env-file .env ps postgres menu-api gateway-api
+            docker compose -f docker-compose.production.yml --env-file .env pull gateway-api menu-api admin-app
+            docker compose -f docker-compose.production.yml --env-file .env up -d menu-api gateway-api admin-app
+            docker compose -f docker-compose.production.yml --env-file .env ps postgres menu-api gateway-api admin-app
             for attempt in \$(seq 1 20); do
               if curl --fail --silent --show-error http://localhost:30000/api/menu/categories > /tmp/firefly-restaurant-menu-health.json; then
                 break
@@ -127,7 +129,16 @@ jobs:
               fi
               sleep 3
             done
-            for container in firefly-restaurant-gateway-api-1 firefly-restaurant-menu-api-1; do
+            for attempt in \$(seq 1 20); do
+              if curl --fail --silent --show-error http://localhost:30001/ > /tmp/firefly-restaurant-admin-health.html; then
+                break
+              fi
+              if [ \$attempt -eq 20 ]; then
+                exit 1
+              fi
+              sleep 3
+            done
+            for container in firefly-restaurant-gateway-api-1 firefly-restaurant-menu-api-1 firefly-restaurant-admin-app-1; do
               docker inspect \$container --format '{{.Name}} {{.Config.Image}}'
             done
           "
@@ -137,6 +148,19 @@ jobs:
           public_api_base_url="${FIREFLY_MENU_API_BASE_URL%/}"
           for attempt in $(seq 1 20); do
             if curl --fail --silent --show-error "${public_api_base_url}/api/menu/categories" > /tmp/firefly-restaurant-public-menu-health.json; then
+              break
+            fi
+            if [ "$attempt" -eq 20 ]; then
+              exit 1
+            fi
+            sleep 3
+          done
+
+      - name: Verify public admin endpoint
+        run: |
+          public_admin_base_url="${FIREFLY_ADMIN_BASE_URL%/}"
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error "${public_admin_base_url}/" > /tmp/firefly-restaurant-public-admin-health.html; then
               break
             fi
             if [ "$attempt" -eq 20 ]; then

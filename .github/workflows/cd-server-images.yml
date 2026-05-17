@@ -47,6 +47,9 @@ jobs:
           - service: menu-api
             image: firefly-restaurant-menu-api
             dockerfile: infra/docker/Firefly.Restaurant.Menu.Api.Dockerfile
+          - service: admin-app
+            image: firefly-restaurant-admin-app
+            dockerfile: infra/docker/Firefly.Restaurant.Admin.App.Dockerfile
 
     steps:
       - name: Checkout
