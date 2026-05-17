@@ -1,8 +1,9 @@
 using Firefly.Restaurant.User.Core.Application.Authentication;
 using Firefly.Restaurant.User.Core.Domain.Consts;
+using Firefly.Restaurant.User.Core.Domain.Entities;
 using Firefly.Restaurant.User.Core.Infrastructure.Authentication;
-using Firefly.Restaurant.User.Core.Options;
-using Microsoft.Extensions.Options;
+using Firefly.Restaurant.User.Core.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Firefly.Restaurant.User.UnitTests;
 
@@ -10,9 +11,16 @@ namespace Firefly.Restaurant.User.UnitTests;
 public sealed class UserAuthenticationServiceTests
 {
     [TestMethod]
-    public async Task AuthenticateAsync_ReturnsUserForConfiguredUserCredentials()
+    public async Task AuthenticateAsync_ReturnsUserForStoredUserCredentials()
     {
-        var service = CreateService();
+        await using var context = CreateDbContext();
+        context.UserAccounts.Add(new UserAccount(
+            account: "user",
+            password: "user-password",
+            role: UserRoles.User,
+            displayName: "Restaurant User"));
+        await context.SaveChangesAsync();
+        var service = new DatabaseUserAuthenticationService(context);
 
         var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
             Account: "user",
@@ -25,28 +33,32 @@ public sealed class UserAuthenticationServiceTests
     }
 
     [TestMethod]
-    public async Task AuthenticateAsync_ReturnsAdminForConfiguredAdminCredentials()
+    public async Task AuthenticateAsync_ReturnsAdminFromSeededDemoCredentials()
     {
-        var service = CreateService();
+        await using var context = CreateDbContext();
+        await new UserDbContextSeed().SeedAsync(context);
+        var service = new DatabaseUserAuthenticationService(context);
 
         var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
             Account: "admin",
-            Password: "admin-password"));
+            Password: "admin"));
 
         Assert.IsNotNull(user);
         Assert.AreEqual("admin", user.Account);
         Assert.AreEqual(UserRoles.Admin, user.Role);
-        Assert.AreEqual("Restaurant Admin", user.DisplayName);
+        Assert.AreEqual("test admin", user.DisplayName);
     }
 
     [TestMethod]
     public async Task AuthenticateAsync_MatchesAccountCaseInsensitively()
     {
-        var service = CreateService();
+        await using var context = CreateDbContext();
+        await new UserDbContextSeed().SeedAsync(context);
+        var service = new DatabaseUserAuthenticationService(context);
 
         var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
             Account: " Admin ",
-            Password: "admin-password"));
+            Password: "admin"));
 
         Assert.IsNotNull(user);
         Assert.AreEqual("admin", user.Account);
@@ -56,14 +68,16 @@ public sealed class UserAuthenticationServiceTests
     [TestMethod]
     public async Task AuthenticateAsync_ReturnsNullForInvalidCredentials()
     {
-        var service = CreateService();
+        await using var context = CreateDbContext();
+        await new UserDbContextSeed().SeedAsync(context);
+        var service = new DatabaseUserAuthenticationService(context);
 
         var wrongPassword = await service.AuthenticateAsync(new AuthenticateUserCommand(
-            Account: "user",
+            Account: "admin",
             Password: "wrong-password"));
         var missingAccount = await service.AuthenticateAsync(new AuthenticateUserCommand(
             Account: "missing",
-            Password: "user-password"));
+            Password: "admin"));
 
         Assert.IsNull(wrongPassword);
         Assert.IsNull(missingAccount);
@@ -72,15 +86,14 @@ public sealed class UserAuthenticationServiceTests
     [TestMethod]
     public async Task AuthenticateAsync_IgnoresAccountsWithoutKnownRoles()
     {
-        var options = CreateOptions();
-        options.Accounts.Add(new UserCredentialOptions
-        {
-            Account = "operator",
-            Password = "operator-password",
-            Role = "operator",
-            DisplayName = "Operator"
-        });
-        var service = new ConfiguredUserAuthenticationService(Options.Create(options));
+        await using var context = CreateDbContext();
+        context.UserAccounts.Add(new UserAccount(
+            account: "operator",
+            password: "operator-password",
+            role: "operator",
+            displayName: "Operator"));
+        await context.SaveChangesAsync();
+        var service = new DatabaseUserAuthenticationService(context);
 
         var user = await service.AuthenticateAsync(new AuthenticateUserCommand(
             Account: "operator",
@@ -89,29 +102,31 @@ public sealed class UserAuthenticationServiceTests
         Assert.IsNull(user);
     }
 
-    private static ConfiguredUserAuthenticationService CreateService()
+    [TestMethod]
+    public async Task SeedAsync_AddsDemoAdminOnlyOnce()
     {
-        return new ConfiguredUserAuthenticationService(Options.Create(CreateOptions()));
+        await using var context = CreateDbContext();
+        var seeder = new UserDbContextSeed();
+
+        await seeder.SeedAsync(context);
+        await seeder.SeedAsync(context);
+
+        var adminUsers = await context.UserAccounts
+            .Where(user => user.Account == "admin")
+            .ToListAsync();
+
+        Assert.HasCount(1, adminUsers);
+        Assert.AreEqual("admin", adminUsers.Single().Password);
+        Assert.AreEqual(UserRoles.Admin, adminUsers.Single().Role);
+        Assert.AreEqual("test admin", adminUsers.Single().DisplayName);
     }
 
-    private static UserAuthenticationOptions CreateOptions()
+    private static UserDbContext CreateDbContext()
     {
-        var options = new UserAuthenticationOptions();
-        options.Accounts.Add(new UserCredentialOptions
-        {
-            Account = "user",
-            Password = "user-password",
-            Role = UserRoles.User,
-            DisplayName = "Restaurant User"
-        });
-        options.Accounts.Add(new UserCredentialOptions
-        {
-            Account = "admin",
-            Password = "admin-password",
-            Role = UserRoles.Admin,
-            DisplayName = "Restaurant Admin"
-        });
+        var options = new DbContextOptionsBuilder<UserDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString("N"))
+            .Options;
 
-        return options;
+        return new UserDbContext(options);
     }
 }
